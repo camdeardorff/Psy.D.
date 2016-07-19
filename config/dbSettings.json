@@ -1,0 +1,9 @@
+{
+	"host": "localhost",
+	"user": "root",
+	"password": "root",
+	"database": "Psych_MD",
+	"port": 8889,
+	"socket": "/Applications/MAMP/tmp/mysql/mysql.sock",
+	"multipleStatements": true
+}
