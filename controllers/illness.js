@@ -13,9 +13,12 @@
 //import the necessary dependancies
 var express = require('express'),
 	router = express.Router(),
+	async = require('async'),
 	auth = require('../middlewares/authenticator'),
 	Illness = require('../models/illness'),
+	Relations = require('../models/relations'),
 	Schemas = require('../schemas');
+
 
 
 /*
@@ -33,6 +36,17 @@ router.get('/', function (req, res) {
 				success: false
 			});
 		} else {
+
+
+			// async.forEachLimit(illnesses, 5, function (illness, callback) {
+			// 	Relations.getSymptomsLinkedToIllness(illness.getData().id)
+			// },
+			// function ())
+			//
+
+
+
+
 			//there is no error, send back the data
 			var formattedIllnesses = [];
 			for (var i = 0; i < illnesses.length; i++) {

@@ -1,9 +1,6 @@
 {
-	"host": "localhost",
-	"user": "root",
-	"password": "root",
-	"database": "Psych_MD",
-	"port": 8889,
-	"socket": "/Applications/MAMP/tmp/mysql/mysql.sock",
-	"multipleStatements": true
+	"host": "us-cdbr-iron-east-04.cleardb.net",
+	"user": "bb759bc3f59a6f",
+	"password": "f1e0b8ba",
+	"database": "heroku_e5fd7f436e0cac6"
 }

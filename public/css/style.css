@@ -8,11 +8,6 @@ div.container {
     /*height: 100%;*/
 }
 
-/*div.container div.row {*/
-/*!*max-height: 100%;*!*/
-/*display: block;*/
-/*}*/
-
 @media (min-width: 768px) {
     html, body {
         height: 100%;
