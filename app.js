@@ -48,6 +48,29 @@ app.get('/', function (req, res) {
 	res.render('index');
 });
 
+
+/*
+
+ {
+ "host": "us-cdbr-iron-east-04.cleardb.net",
+ "user": "bb759bc3f59a6f",
+ "password": "f1e0b8ba",
+ "database": "heroku_e5fd7f436e0cac6"
+ }
+
+
+ {
+ "host": "localhost",
+ "user": "root",
+ "password": "root",
+ "database": "Psych_MD",
+ "port": 8889,
+ "socket": "/Applications/MAMP/tmp/mysql/mysql.sock",
+ "multipleStatements": true
+ }
+
+ */
+
 //
 // Relations.getSymptomsLinkedToCategory(1, function (err, symptoms) {
 // 	console.log("get symptoms linked to category callback");
@@ -77,13 +100,13 @@ app.get('/', function (req, res) {
 // });
 
 
-Relations.getCategoriesLinkedToSymptom(1, function (err, categories) {
-	if (err) {
-		console.log(err);
-	} else {
-		console.log(categories);
-	}
-});
+// Relations.getCategoriesLinkedToSymptom(1, function (err, categories) {
+// 	if (err) {
+// 		console.log(err);
+// 	} else {
+// 		console.log(categories);
+// 	}
+// });
 
 
 var server = app.listen(3000, function () {
