@@ -55,7 +55,8 @@ Category.prototype.save = function (callback) {
 	}
 
 	//create a new entry in the database for this illness
-	var query = db.query("INSERT INTO `category` (??) VALUES (?);", [cols, vals],
+	
+	var query = db.getConnection().query("INSERT INTO `category` (??) VALUES (?);", [cols, vals],
 		function (err, result) {
 			//hand an error if there is one
 			if (err) {
@@ -96,7 +97,7 @@ Category.prototype.update = function (callback) {
 
 
 			var query = "UPDATE `category` SET " + inserts + " WHERE `category`.`id` =  ?;";
-			var q = db.query(query, values, function (err, result) {
+			var q = db.getConnection().query(query, values, function (err, result) {
 				if (err) {
 					console.log(err);
 					callback(err);
@@ -125,7 +126,7 @@ Category.prototype.update = function (callback) {
  */
 Category.getAll = function (callback) {
 	//query the database for all illnesses
-	db.query("SELECT * FROM `category`;", function (err, rows, fields) {
+	db.getConnection().query("SELECT * FROM `category`;", function (err, rows, fields) {
 		//check for an error and return one if there is
 		if (err) {
 			callback(err);
@@ -143,7 +144,7 @@ Category.getAll = function (callback) {
 };
 
 Category.getById = function (id, callback) {
-	var query = db.query("SELECT * FROM `category` WHERE `category`.`id` = ?", id,
+	var query = db.getConnection().query("SELECT * FROM `category` WHERE `category`.`id` = ?", id,
 		function (err, rows) {
 			if (err) {
 				console.log(err);

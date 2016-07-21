@@ -53,7 +53,7 @@ Symptom.prototype.save = function (callback) {
 		vals.push(this.data[col])
 	}
 	//insert into the databse  INSERT INTO `symptom` (`id`, `name`) VALUES (NULL, 'something for this test');
-	var query = db.query("INSERT INTO `symptom` (??) VALUES (?);", [cols, vals],
+	var query = db.getConnection().query("INSERT INTO `symptom` (??) VALUES (?);", [cols, vals],
 		function (err, result) {
 			//check for an error
 			console.log("symptom save query callback");
@@ -99,7 +99,7 @@ Symptom.prototype.update = function (callback) {
 
 
 			var query = "UPDATE `symptom` SET " + inserts + " WHERE `symptom`.`id` =  ?;";
-			var q = db.query(query, values, function (err, result) {
+			var q = db.getConnection().query(query, values, function (err, result) {
 				if (err) {
 					console.log(err);
 					callback(err);
@@ -123,7 +123,7 @@ Symptom.prototype.delete = function (callback) {
 		} else {
 			//the symptom exists. lets delete it
 			var query = "DELETE FROM `symptom` WHERE `symptom`.`id` = ?"
-			var q = db.query(query, symptomData.id, function (err, result) {
+			var q = db.getConnection().query(query, symptomData.id, function (err, result) {
 				if (err) {
 					console.log(err);
 					callback(err);
@@ -151,7 +151,7 @@ Symptom.prototype.delete = function (callback) {
 */
 Symptom.getAll = function (callback) {
 	//query the databse for the symptoms
-	db.query("SELECT * FROM `symptom`", function (err, rows) {
+	db.getConnection().query("SELECT * FROM `symptom`", function (err, rows) {
 		//check for an error
 		if (err) {
 			//send back the error
@@ -179,7 +179,7 @@ Symptom.getAll = function (callback) {
 */
 Symptom.getById = function (id, callback) {
 	//query the database for all of the symptoms that match the id
-	var query = db.query("SELECT * FROM `symptom` " +
+	var query = db.getConnection().query("SELECT * FROM `symptom` " +
 		"WHERE `id` = ?", id,
 		function (err, rows, fields) {
 			//check for an error

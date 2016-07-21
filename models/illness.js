@@ -56,7 +56,7 @@ Illness.prototype.save = function (callback) {
 	}
 
 	//create a new entry in the database for this illness
-	db.query("INSERT INTO `illness` (??) " +
+	db.getConnection().query("INSERT INTO `illness` (??) " +
 		"VALUES (?);", [cols, vals],
 		function (err, result) {
 			//hand an error if there is one
@@ -101,7 +101,7 @@ Illness.prototype.update = function (callback) {
 
 			console.log(inserts);
 			var query = "UPDATE `illness` SET " + inserts + " WHERE `illness`.`id` =  ?;";
-			var q = db.query(query, values, function (err, result) {
+			var q = db.getConnection().query(query, values, function (err, result) {
 				if (err) {
 					console.log(err);
 					callback(err);
@@ -125,7 +125,7 @@ Illness.prototype.delete = function (callback) {
 		} else {
 			//the illness exists. lets delete it
 			var query = "DELETE FROM `illness` WHERE `illness`.`id` = ?"
-				var q = db.query(query, illnessData.id, function (err, result) {
+				var q = db.getConnection().query(query, illnessData.id, function (err, result) {
 				if (err) {
 					console.log(err);
 					callback(err);
@@ -150,7 +150,7 @@ Illness.prototype.delete = function (callback) {
 */
 Illness.getAll = function (callback) {
 	//query the database for all illnesses
-	db.query("SELECT * FROM `illness`;", function (err, rows, fields) {
+	db.getConnection().query("SELECT * FROM `illness`;", function (err, rows, fields) {
 		//check for an error and return one if there is
 		if (err) {
 			callback(err);
@@ -177,7 +177,7 @@ Illness.getAll = function (callback) {
 
 Illness.getById = function (id, callback) {
 	//query the database for the illness that relates to the id provided
-	db.query("SELECT * FROM `illness` " +
+	db.getConnection().query("SELECT * FROM `illness` " +
 		"WHERE `id` = ?", [id],
 		function (err, rows, fields, result) {
 			//check for an error

@@ -66,7 +66,7 @@ Relations.deleteIllnessSymptomRelation = function (illnessId, symptomId, callbac
 					callback(null, false);
 				} else {
 					//there is a relaton. lets delete it
-					var query = db.query("DELETE FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
+					var query = db.getConnection().query("DELETE FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
 						function (err, result) {
 							if (err) {
 								console.log(err);
@@ -129,7 +129,7 @@ Relations.getSymptomsLinkedToIllness = function (id, majorCallback) {
 					return;
 				}
 				//query the database for the symptom ids that relate to the illness id
-				db.query("SELECT DISTINCT `symptom`.* FROM `illness_symptoms`, `symptom` WHERE `illness_id` = ? AND `symptom`.`id` = ?", [id, id], function (err, rows) {
+				db.getConnection().query("SELECT DISTINCT `symptom`.* FROM `illness_symptoms`, `symptom` WHERE `illness_id` = ? AND `symptom`.`id` = ?", [id, id], function (err, rows) {
 					//check for an error
 					if (err) {
 						callback(err);
@@ -254,7 +254,7 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 											var queryString = "INSERT INTO `illness_symptoms` (`illness_id`, `symptom_id`) VALUES(?,?);";
 											var values = [illnessId, symptomId];
 											//query the database
-											var query = db.query(queryString, values, function (err, result) {
+											var query = db.getConnection().query(queryString, values, function (err, result) {
 												if (err) {
 													console.log("error in relating query");
 													console.log(err);
@@ -345,7 +345,7 @@ Relations.getIllnessesLinkedToSymptom = function (id, majorCallback) {
 
 
 					//query the database for the illnesses that are related to the symptom id
-					var query = db.query(queryString, [id], function (err, rows) {
+					var query = db.getConnection().query(queryString, [id], function (err, rows) {
 						//if there is an error
 						if (err) {
 							callback(err);
@@ -460,7 +460,7 @@ Relations.linkIllnessesToSymptom = function (symptomId, illnessIds, majorCallbac
 										var queryString = "INSERT INTO `illness_symptoms` (`illness_id`, `symptom_id`) VALUES(?,?);";
 										var values = [illnessId, symptomId];
 										//query the database
-										var query = db.query(queryString, values, function (err, result) {
+										var query = db.getConnection().query(queryString, values, function (err, result) {
 											if (err) {
 												console.log("error in relating query");
 												console.log(err);
@@ -574,7 +574,7 @@ Relations.getSymptomsLinkedToCategory = function (id, majorCallback) {
 						"WHERE `illness_symptoms`.`symptom_id` = `symptom`.`id` " +
 						"AND " + inserts;
 
-					var query = db.query(queryString, illnessesIdsInCategory, function (err, rows) {
+					var query = db.getConnection().query(queryString, illnessesIdsInCategory, function (err, rows) {
 						if (err) {
 							console.log(err);
 							callback(err);
@@ -673,7 +673,7 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 						"WHERE `category`.`id` = `illness`.`category` " +
 						"AND ( " + inserts + " )";
 
-					var query = db.query(queryString, illnessIds,
+					var query = db.getConnection().query(queryString, illnessIds,
 						function (err, rows) {
 							if (err) {
 								console.log(err);
@@ -706,7 +706,7 @@ Relations.getIllnessesInCategory = function (id, callback) {
 			callback(err || "No such category with id: " + id);
 		} else {
 			//SELECT `illness`.* FROM `category`, `illness` WHERE `category`.`id` = 1 AND `illness`.`category` = 1
-			var query = db.query("SELECT `illness`.* FROM `category`, `illness` WHERE `category`.`id` = ? AND `illness`.`category` = ?", [id, id],
+			var query = db.getConnection().query("SELECT `illness`.* FROM `category`, `illness` WHERE `category`.`id` = ? AND `illness`.`category` = ?", [id, id],
 				function (err, rows) {
 					if (err) {
 						console.log(err);
