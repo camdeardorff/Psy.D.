@@ -2,5 +2,6 @@
   "host": "us-cdbr-iron-east-04.cleardb.net",
   "user": "bb759bc3f59a6f",
   "password": "f1e0b8ba",
-  "database": "heroku_e5fd7f436e0cac6"
+  "database": "heroku_e5fd7f436e0cac6",
+  "reconnect": true
 }
