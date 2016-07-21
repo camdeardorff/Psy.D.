@@ -169,26 +169,33 @@ router.put('/', function (req, res) {
 	}
 });
 
-router.delete('/', function (req, res) {
+router.delete('/:id', function (req, res) {
 	var message = {};
-	const data = req.body.symptom;
-	const dataInfo = Schemas.validateDataWithSchema(data, Schemas.symptom);
+	const id = req.params.id;
+	// const dataInfo = Schemas.validateDataWithSchema(data, Schemas.symptom);
 
-	if (!dataInfo.valid) {
+	if (!id) {
 		message.error = "Bad request data. Missing parameters.";
-		message.missingProperty = dataInfo.missingProperty;
+		message.missingProperty = "id";
 		message.success = false;
 		res.json(message);
 	} else {
-		var symptom = new Symptom(data);
-		symptom.delete(function (err) {
+		Symptom.getById(id, function (err, symptom) {
 			if (err) {
 				message.success = false;
 				message.error = err;
+				res.json(message);
 			} else {
-				message.success = true;
+				symptom.delete(function (err) {
+					if (err) {
+						message.success = false;
+						message.error = err;
+					} else {
+						message.success = true;
+					}
+					res.json(message);
+				});
 			}
-			res.json(message);
 		});
 	}
 });

@@ -32,7 +32,7 @@ Relations.isUniqueIllnessSymptomRelation = function (illnessId, symptomId, callb
 		err = "bad illness and/or symptom id(s)"
 		callback(err);
 	} else {
-		var query = db.query("SELECT * FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
+		var query = db .getConnection().query("SELECT * FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
 			function (err, rows) {
 				var isUnique;
 				if (err) {
@@ -48,7 +48,6 @@ Relations.isUniqueIllnessSymptomRelation = function (illnessId, symptomId, callb
 					callback(null, isUnique);
 				}
 			});
-		console.log(query.sql);
 	}
 };
 
@@ -66,7 +65,7 @@ Relations.deleteIllnessSymptomRelation = function (illnessId, symptomId, callbac
 					callback(null, false);
 				} else {
 					//there is a relaton. lets delete it
-					var query = db.getConnection().query("DELETE FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
+					db.getConnection().query("DELETE FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
 						function (err, result) {
 							if (err) {
 								console.log(err);
@@ -129,7 +128,7 @@ Relations.getSymptomsLinkedToIllness = function (id, majorCallback) {
 					return;
 				}
 				//query the database for the symptom ids that relate to the illness id
-				db.getConnection().query("SELECT DISTINCT `symptom`.* FROM `illness_symptoms`, `symptom` WHERE `illness_id` = ? AND `symptom`.`id` = ?", [id, id], function (err, rows) {
+				db.getConnection().query("SELECT DISTINCT `symptom`.* FROM `illness_symptoms`, `symptom` WHERE `illness_id` = ? AND `symptom`.`id` = `illness_symptoms`.`symptom_id`", [id], function (err, rows) {
 					//check for an error
 					if (err) {
 						callback(err);
@@ -266,7 +265,6 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 												}
 												callback(err);
 											}); //end relation query
-											console.log(query.sql);
 										} //end else case (normal case)
 									} //end relation unique check function
 								); //end relation unique check
@@ -359,7 +357,6 @@ Relations.getIllnessesLinkedToSymptom = function (id, majorCallback) {
 							callback();
 						}
 					});
-					console.log(query.sql);
 
 				}
 			}
@@ -473,7 +470,6 @@ Relations.linkIllnessesToSymptom = function (symptomId, illnessIds, majorCallbac
 											}
 											callback(err);
 										}); //end relation query
-										console.log(query.sql);
 									}
 								});
 							}
@@ -585,7 +581,6 @@ Relations.getSymptomsLinkedToCategory = function (id, majorCallback) {
 							callback(null, symptoms);
 						}
 					});
-					console.log(query.sql);
 				}
 			}
 		],
@@ -686,7 +681,6 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 							}
 						}
 					);
-					console.log(query.sql);
 				}
 			}
 		],

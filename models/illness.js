@@ -111,7 +111,6 @@ Illness.prototype.update = function (callback) {
 					callback();
 				}
 			});
-			console.log(q.sql);
 		}
 	});
 };
@@ -135,7 +134,6 @@ Illness.prototype.delete = function (callback) {
 					callback();
 				}
 			});
-			console.log(q.sql);
 		}
 	});
 };

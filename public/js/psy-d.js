@@ -1,17 +1,17 @@
 categoryUrls = {
 	newCategory: "/category/",
 	allCategory: "/category/",
-	byIdSymptom: ""
+	deleteCategory: "/category/"
 };
 illnessUrls = {
 	newIllness: "/illness/",
 	allIllness: "/illness/",
-	byIdIllness: ""
+	deleteIllness: "/illness/"
 };
 symptomUrls = {
 	newSymptom: "/symptom/",
 	allSymptoms: "/symptom/",
-	byIdSymptom: ""
+	deleteSymptom: "/symptom/"
 };
 
 relationUrls = {
@@ -46,12 +46,9 @@ function getAll(type) {
 			if (data.success) {
 				categoryList.find('ul').empty();
 				categories = data.categories;
-				for (var i = 0; i < data.categories.length; i++) {
-					var obj = data.categories[i];
-					createCategoryBlock(obj.category.id, obj.category.name);
-				}
+				loadCategories(data.categories);
 			}
-			reloadHandlers();
+			// reloadHandlers();
 
 		});
 	}
@@ -60,12 +57,9 @@ function getAll(type) {
 			if (data.success) {
 				illnessList.find('ul').empty();
 				illnesses = data.illnesses;
-				for (var i = 0; i < data.illnesses.length; i++) {
-					var obj = data.illnesses[i];
-					createIllnessBlock(obj.illness.id, obj.illness.name, obj.illness.code);
-				}
+				loadIllnesses(data.illnesses);
 			}
-			reloadHandlers();
+			// reloadHandlers();
 		});
 	}
 	if (type === "SYMPTOMS" || type === "") {
@@ -73,50 +67,46 @@ function getAll(type) {
 			if (data.success) {
 				symptomList.find('ul').empty();
 				symptoms = data.symptoms;
-				for (var i = 0; i < data.symptoms.length; i++) {
-					var obj = data.symptoms[i];
-					createSymptomBlock(obj.symptom.id, obj.symptom.name);
-				}
+				loadSymptoms(data.symptoms);
 			}
-			reloadHandlers();
+			// reloadHandlers();
 		});
 	}
 
 }
 
+function loadCategories(cat) {
+	categoryList.find('ul').empty();
+	cat = cat || categories;
+	for (var i = 0; i < cat.length; i++) {
+		createCategoryBlock(cat[i].category);
+	}
+	reloadHandlers();
+}
+function loadIllnesses(ill) {
+	illnessList.find('ul').empty();
+
+	ill = ill || illnesses;
+	for (var i = 0; i < ill.length; i++) {
+		createIllnessBlock(ill[i].illness);
+	}
+	reloadHandlers();
+}
+function loadSymptoms(symp) {
+	symptomList.find('ul').empty();
+
+	symp = symp || symptoms;
+	for (var i = 0; i < symp.length; i++) {
+		createSymptomBlock(symp[i].symptom);
+	}
+	reloadHandlers();
+}
+
 
 function reloadHandlers() {
-	$('div.check-div').hide();
-
-	// $('div.psy-list ul li').off().click(function () {
-	// 	var checkbox = $(this).children('div.check-div').children('input[type="checkbox"]');
-	// 	if (!checkbox.is(':hidden')) {
-	//
-	//
-	// 		if (!checkbox.prop("checked")) {
-	// 			checkbox.prop("checked", true);
-	// 			console.log("NOW");
-	//
-	//
-	// 			if (filterOn) {
-	// 				var id = $(this).attr('id');
-	// 				if (id.includes("cat")) {
-	// 					console.log("category box");
-	// 				} else if (id.includes("ill")) {
-	// 					console.log("illness box");
-	// 				} else if (id.includes("symp")) {
-	// 					console.log("symptom box");
-	// 				}
-	// 			}
-	//
-	//
-	// 		} else {
-	// 			checkbox.prop("checked", false);
-	// 		}
-	// 	}
-	// });
-
-
+	if (!filterOn) {
+		$('div.check-div').hide();
+	}
 	$('div.check-div input[type="checkbox"]').off().click(function () {
 		console.log("CLICK");
 		if ($(this).prop("checked") && filterOn) {
@@ -125,13 +115,18 @@ function reloadHandlers() {
 				console.log("category box");
 			} else if (id.includes("ill")) {
 				console.log("illness box");
+				console.log($(this).parent().parent().data('illness'));
+				var illness = $(this).parent().parent().data('illness');
+				filterCategoriesWithoutId(illness.category);
+				filterSymptomsWithoutIds(illness.symptoms);
 			} else if (id.includes("symp")) {
 				console.log("symptom box");
 			}
-
+		} else if (filterOn) {
+			loadCategories();
+			loadSymptoms();
 		}
-	})
-
+	});
 }
 
 
@@ -145,12 +140,14 @@ $('div.container-title-options span.glyphicon-search').click(function () {
 $('div.container-title-options span.glyphicon-filter').click(function () {
 	//to turn off
 	if ($(this).hasClass("state-ON")) {
+		console.log("TURN OFF FILTER");
 		$(this).removeClass("state-ON");
 		$(this).addClass("state-OFF");
 		$('div.check-div').hide();
 		filterOn = false;
 		getAll();
 	} else {//to turn on
+		console.log("TURN ON FILTER");
 		$('div.container-title-options span.glyphicon-filter').addClass("state-OFF").removeClass("state-ON");
 		$(this).removeClass("state-OFF");
 		$(this).addClass("state-ON");
@@ -246,7 +243,6 @@ function newIllness(newIllElem) {
 			makeRequest('POST', illnessUrls.newIllness, illness, function (data) {
 				if (data.success) {
 					cancelNew(newIllElem);
-					getAll("ILLNESSES");
 					console.log("RELATE NOW");
 
 					var relations = {
@@ -259,6 +255,8 @@ function newIllness(newIllElem) {
 					makeRequest('POST', relationUrls.newIllnessSymptoms, relations, function (data) {
 						if (data.success) {
 							console.log("ITS GOOD");
+							getAll("ILLNESSES");
+
 						} else {
 							console.log("Bad relation");
 						}
@@ -281,12 +279,17 @@ function cancelNew(cancelElem) {
 
 function makeRequest(method, url, data, callback) {
 	//get all of the illnesses
+	if (!data) {
+		data = "{}";
+	} else {
+		data = JSON.stringify(data)
+	}
 	$.ajax({
 		method: method,
 		url: url,
 		contentType: 'application/json',
 		dataType: 'json',
-		data: JSON.stringify(data),
+		data: data,
 		error: function (request, status, error) {
 			console.log(request);
 			console.log(status);
@@ -375,7 +378,7 @@ $('#category-list-search').keyup(function () {
 	for (var i = 0; i < reducedCategories.length; i++) {
 		var id = reducedCategories[i].category.id;
 		var name = reducedCategories[i].category.name;
-		createCategoryBlock(id, name);
+		createCategoryBlock(reducedCategories[i].category);
 	}
 
 });
@@ -389,7 +392,7 @@ $('#illness-list-search').keyup(function () {
 		var id = reducedIllnesses[i].illness.id;
 		var name = reducedIllnesses[i].illness.name;
 		var code = reducedIllnesses[i].illness.code;
-		createIllnessBlock(id, name, code);
+		createIllnessBlock(reducedIllnesses[i].illness);
 	}
 
 });
@@ -402,7 +405,7 @@ $('#symptom-list-search').keyup(function () {
 	for (var i = 0; i < reducedSymptoms.length; i++) {
 		var id = reducedSymptoms[i].symptom.id;
 		var name = reducedSymptoms[i].symptom.name;
-		createSymptomBlock(id, name);
+		createSymptomBlock(reducedSymptoms[i].symptom);
 	}
 
 });
@@ -418,32 +421,99 @@ function search(type, comparisonType, collection, comparator) {
 }
 
 
-function createCategoryBlock(id, name) {
+function createCategoryBlock(category) {
+	var hidden = "";
+	if (!categoryList.find('span.glyphicon-filter').hasClass("state-ON")) {
+		hidden = "style='display: none;'";
+	}
+
 	categoryList.find('ul').prepend("" +
-		"<li class='category-data well' data-category-id='" + id + "'>" +
-		"<div class='check-div'><input type='checkbox' id='cat-" + id + "'/>" +
-		"<label for='cat-" + id + "'><span></span></label></div>" +
-		"<div class='info-div'><h4>" + name + "</h4></div>" +
-		"</li>");
-}
-
-function createIllnessBlock(id, name, code) {
-	illnessList.find('ul').prepend("" +
-		"<li class='illness-data well' data-illness-id='" + id + "'>" +
-		"<div class='check-div'><input type='checkbox' id='ill-" + id + "'/> <label for='ill-" + id + "'><span></span></label></div>" +
-		"<div class='info-div'><h4>" + name + "</h4>" +
-		"<span><b>ID: </b>" + id + ", </span>&nbsp;" +
-		"<span><b>Code: </b>" + code + "</span>" +
+		"<li class='category-data well' data-category-id='" + category.id + "'>" +
+		"<div class='check-div'" + hidden + "><input type='checkbox' id='cat-" + category.id + "'/>" +
+		"<label for='cat-" + category.id + "'><span></span></label></div>" +
+		"<div class='info-div'>" +
+		"<h4>" + category.name + "</h4>" +
+		// "<span><a class='remove-btn' onclick='removeCategory("+ category.id +")'>Remove</a></span>" +
 		"</div>" +
 		"</li>");
 }
 
-function createSymptomBlock(id, name) {
+function createIllnessBlock(illness) {
+	var hidden = "";
+	if (!illnessList.find('span.glyphicon-filter').hasClass("state-ON")) {
+		hidden = "style='display: none;'";
+	}
+
+	var illnessLIString = "<li class='illness-data well' data-illness-id='" + illness.id + "'>" +
+		"<div class='check-div'" + hidden + "><input type='checkbox' id='ill-" + illness.id + "'/> <label for='ill-" + illness.id + "'><span></span></label></div>" +
+		"<div class='info-div'><h4>" + illness.name + "</h4>" +
+		"<span><b>ID: </b>" + illness.id + ", </span>&nbsp;" +
+		"<span><b>Code: </b>" + illness.code + "</span>&nbsp;" +
+		"<span><a class='remove-btn' onclick='removeIllness("+ illness.id +")'>Remove</a></span>" +
+		"</div>" +
+		"</li>";
+
+	var illnessLI = $.parseHTML(illnessLIString);
+	$(illnessLI).data('illness', illness);
+	illnessList.find('ul').prepend(illnessLI);
+}
+
+function createSymptomBlock(symptom) {
+	var hidden = "";
+	if (!symptomList.find('span.glyphicon-filter').hasClass("state-ON")) {
+		hidden = "style='display: none;'";
+	}
+
 	symptomList.find('ul').prepend("" +
-		"<li class='symptom-data well' data-symptom-id='" + id + "'>" +
-		"<div class='check-div'><input type='checkbox' id='symp-" + id + "'/> <label for='symp-" + id + "'><span></span></label></div>" +
-		"<div class='info-div'><h4>" + name + "</h4>" +
-		"<span><b>ID: </b>" + id + "</span>" +
+		"<li class='symptom-data well' data-symptom-id='" + symptom.id + "'>" +
+		"<div class='check-div'" + hidden + "><input type='checkbox' id='symp-" + symptom.id + "'/> <label for='symp-" + symptom.id + "'><span></span></label></div>" +
+		"<div class='info-div'><h4>" + symptom.name + "</h4>" +
+		"<span><b>ID: </b>" + symptom.id + "</span>&nbsp;" +
+		"<span><a class='remove-btn' onclick='removeSymptom("+ symptom.id +")'>Remove</a></span>" +
 		"</div>" +
 		"</li>");
+}
+
+function removeCategory(id) {
+	console.log("remove Category with id: ", id);
+	makeRequest("DELETE", categoryUrls.deleteCategory + id, null, function (data) {
+		console.log("successful delete");
+		getAll("CATEGORIES");
+	});
+}
+
+function removeIllness(id) {
+	makeRequest("DELETE", illnessUrls.deleteIllness + id, null, function (data) {
+		console.log("successful delete");
+		getAll("ILLNESSES");
+	});
+}
+
+function removeSymptom(id) {
+	console.log("remove symptom with id: ", id);
+	makeRequest("DELETE", symptomUrls.deleteSymptom + id, null, function (data) {
+		console.log("successful delete");
+		getAll("SYMPTOMS");
+	});
+}
+
+
+function filterCategoriesWithoutId(id) {
+	var categoryItems = categoryList.find('ul li');
+	$.each(categoryItems, function (index, catItem) {
+		catItem = $(catItem);
+		if (catItem.data('category-id') != id) {
+			catItem.remove();
+		}
+	});
+}
+
+function filterSymptomsWithoutIds(ids) {
+	var symptomItems = symptomList.find('ul li');
+	$.each(symptomItems, function (index, sympItem) {
+		sympItem = $(sympItem);
+		if (!ids.includes(sympItem.data('symptom-id'))) {
+			sympItem.remove();
+		}
+	});
 }

@@ -15,7 +15,7 @@ div.container {
     }
 
     div.psy-list {
-        height: 100%;
+        height: 80%;
         position: absolute;
     }
 
@@ -91,5 +91,10 @@ div.create-new-ico {
 }
 
 div.create-new-ico span {
+    float: right;
+}
+
+a.remove-btn {
+    color: #dd7700;
     float: right;
 }

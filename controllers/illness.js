@@ -20,7 +20,6 @@ var express = require('express'),
 	Schemas = require('../schemas');
 
 
-
 /*
  ROUTE: GET @ ---/all
  PURPOSE: to collect all of the illnesses that are on record and send them back to the client.
@@ -37,26 +36,44 @@ router.get('/', function (req, res) {
 			});
 		} else {
 
-
-			// async.forEachLimit(illnesses, 5, function (illness, callback) {
-			// 	Relations.getSymptomsLinkedToIllness(illness.getData().id)
-			// },
-			// function ())
-			//
-
-
-
-
-			//there is no error, send back the data
 			var formattedIllnesses = [];
-			for (var i = 0; i < illnesses.length; i++) {
-				formattedIllnesses[i] = {illness: illnesses[i].getData()}
-			}
 
 
-			res.json({
-				success: true,
-				illnesses: formattedIllnesses
+			async.forEachLimit(illnesses, 5, function (illness, callback) {
+				console.log(illness);
+
+				Relations.getSymptomsLinkedToIllness(illness.getData().id, function (err, symptoms) {
+					if (err) {
+						console.log(err);
+						callback(err);
+					} else {
+
+						var symptomIds = [];
+						for (var i = 0; i < symptoms.length; i++) {
+							symptomIds.push(symptoms[i].getData().id);
+						}
+
+						illness.data.symptoms = symptomIds;
+
+						formattedIllnesses.push({illness: illness.getData()});
+
+						callback();
+					}
+				});
+
+
+			}, function (err) {
+				if (err) {
+					res.json({
+						success: false,
+						error: err
+					});
+				} else {
+					res.json({
+						success: true,
+						illnesses: formattedIllnesses
+					});
+				}
 			});
 		}
 	});
@@ -91,10 +108,24 @@ router.get('/:id', function (req, res) {
 				//no errors but the illness could be null
 				if (illness) {
 					//true illness. send it back
-					res.json({
-						success: true,
-						illness: illness.getData()
+
+					Relations.getSymptomsLinkedToIllness(illness.getData().id, function (err, symptoms) {
+
+						var symptomIds = [];
+						for (var i = 0; i < symptoms.length; i++) {
+							symptomIds.push(symptoms[i].getData().id);
+						}
+
+						illness.data.symptoms = symptomIds;
+
+						res.json({
+							success: true,
+							illness: illness.getData()
+						});
+
 					});
+
+
 				} else {
 					//there was no db error but there was no such illness
 					res.json({
@@ -146,7 +177,6 @@ router.post("/", function (req, res) {
 router.put('/', function (req, res) {
 	var message = {};
 	var data = req.body.illness;
-	console.log(data);
 	var dataInfo = Schemas.validateDataWithSchema(data, Schemas.illness);
 
 	if (!dataInfo.valid) {
@@ -169,26 +199,27 @@ router.put('/', function (req, res) {
 	}
 });
 
-router.delete('/', function (req, res) {
+router.delete('/:id', function (req, res) {
 	var message = {};
-	const data = req.body.illness;
-	const dataInfo = Schemas.validateDataWithSchema(data, Schemas.illness);
+	const id = req.params.id;
+	// const dataInfo = Schemas.validateDataWithSchema(data, Schemas.illness);
 
-	if (!dataInfo.valid) {
+	if (!id) {
 		message.error = "Bad request data. Missing parameters.";
-		message.missingProperty = dataInfo.missingProperty;
+		message.missingProperty = "id";
 		message.success = false;
 		res.json(message);
 	} else {
-		var illness = new Illness(data);
-		illness.delete(function (err) {
-			if (err) {
-				message.success = false;
-				message.error = err;
-			} else {
-				message.success = true;
-			}
-			res.json(message);
+		Illness.getById(id, function (err, illness) {
+			illness.delete(function (err) {
+				if (err) {
+					message.success = false;
+					message.error = err;
+				} else {
+					message.success = true;
+				}
+				res.json(message);
+			});
 		});
 	}
 });

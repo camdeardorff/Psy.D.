@@ -14,7 +14,6 @@ var db = function () {
 };
 
 db.getConnection = function () {
-	console.log(db);
     if (db.connection) {
 		return db.connection;
     } else {
@@ -28,13 +27,13 @@ db.getConnection = function () {
             }
         });
 	    this.connection.on('error', function (err) {
-		    console.log('db error', err);
+		    // console.log('db error', err);
 		    if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
-			    console.log("PROTOCOL_CONNECTION_LOST TRUE");
+			    // console.log("PROTOCOL_CONNECTION_LOST TRUE");
 				db.connection = null;
 			    setTimeout(db.getConnection, 2000);
 		    } else {
-			    console.log("PROTOCOL_CONNECTION_LOST TRUE");
+			    // console.log("PROTOCOL_CONNECTION_LOST TRUE");
 			    throw err;
 		    }
 	    })
