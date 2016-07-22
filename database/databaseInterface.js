@@ -29,9 +29,9 @@ db.getConnection = function () {
 	    this.connection.on('error', function (err) {
 		    // console.log('db error', err);
 		    if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
-			    // console.log("PROTOCOL_CONNECTION_LOST TRUE");
+			    console.log("Connection to database was lost. Idle without connection until we need it.");
 				db.connection = null;
-			    setTimeout(db.getConnection, 2000);
+			    //setTimeout(db.getConnection, 2000);
 		    } else {
 			    // console.log("PROTOCOL_CONNECTION_LOST TRUE");
 			    throw err;
@@ -39,7 +39,7 @@ db.getConnection = function () {
 	    })
     }
     return this.connection;
-}
+};
 
 db.getConnection();
 
