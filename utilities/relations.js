@@ -15,37 +15,28 @@
 var db = require('../database/databaseInterface'),
 	schemas = require("../schemas.js"),
 	async = require("async"),
-	_ = require("lodash"),
 	Illness = require('../models/illness'),
 	Symptom = require('../models/symptom'),
 	Category = require('../models/category');
 
 
 //Relations constructor
-function Relations() {
-};
+function Relations() {}
 
 
 Relations.isUniqueIllnessSymptomRelation = function (illnessId, symptomId, callback) {
 	console.log("MODEL: Relations, FUNCTION: isUniqueIllnessSymptomRelation");
 	if (!illnessId || !symptomId) {
-		err = "bad illness and/or symptom id(s)"
+		var err = "bad illness and/or symptom id(s)";
 		callback(err);
 	} else {
-		var query = db .getConnection().query("SELECT * FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
+		db.getConnection().query("SELECT * FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
 			function (err, rows) {
-				var isUnique;
 				if (err) {
 					console.log(err);
 					callback(err);
 				} else {
-					if (rows.length > 0) {
-						isUnique = false;
-					} else {
-						isUnique = true;
-					}
-					console.log("is unique? : ", isUnique);
-					callback(null, isUnique);
+					callback(null, rows.length > 0);
 				}
 			});
 	}
@@ -61,10 +52,10 @@ Relations.deleteIllnessSymptomRelation = function (illnessId, symptomId, callbac
 				callback(err);
 			} else {
 				if (isUnique) {
-					//there isnt a relation with that info
+					//there isn't a relation with that info
 					callback(null, false);
 				} else {
-					//there is a relaton. lets delete it
+					//there is a relation. lets delete it
 					db.getConnection().query("DELETE FROM `illness_symptoms` WHERE `illness_id` = ? AND `symptom_id` = ?", [illnessId, symptomId],
 						function (err, result) {
 							if (err) {
@@ -74,7 +65,7 @@ Relations.deleteIllnessSymptomRelation = function (illnessId, symptomId, callbac
 								if (result.affectedRows > 0) {
 									callback(null, true);
 								} else {
-									err = "The relation exists but it wasnt deleted... strange";
+									err = "The relation exists but it wasn't deleted... strange";
 									callback(err, false);
 								}
 							}
@@ -94,7 +85,7 @@ Relations.deleteIllnessSymptomRelation = function (illnessId, symptomId, callbac
 Relations.getSymptomsLinkedToIllness = function (id, majorCallback) {
 	var illnessFromId = null;
 	//list of symptom ids to be found
-	var symptomIds = [];
+	// var symptomIds = [];
 	//list of symptoms to be found from their ids
 	var symptoms = [];
 
@@ -114,7 +105,6 @@ Relations.getSymptomsLinkedToIllness = function (id, majorCallback) {
 							callback();
 						} else {
 							callback("No such illness with id: " + id);
-							return;
 						}
 					}
 				});
@@ -169,7 +159,7 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 	var duplicateEntries = [];
 
 	if (symptomIds.length < 1) {
-		err = "No symptoms to relate to illness with id: " + illnessId;
+		var err = "No symptoms to relate to illness with id: " + illnessId;
 		majorCallback(err);
 		return;
 	}
@@ -183,7 +173,7 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 	async.series([
 			//get illness obj from id
 			function (callback) {
-				//use illness static functino for getting illnesses from db
+				//use illness static function for getting illnesses from db
 				Illness.getById(illnessId, function (err, illness) {
 					//check for and handle errors
 					console.log("get id completed with err: " + err);
@@ -248,12 +238,12 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 											});
 											callback();
 										} else {
-											//no error and a valud symptom
+											//no error and a valid symptom
 											//relate the illness and symptom
 											var queryString = "INSERT INTO `illness_symptoms` (`illness_id`, `symptom_id`) VALUES(?,?);";
 											var values = [illnessId, symptomId];
 											//query the database
-											var query = db.getConnection().query(queryString, values, function (err, result) {
+											var query = db.getConnection().query(queryString, values, function (err) {
 												if (err) {
 													console.log("error in relating query");
 													console.log(err);
@@ -269,7 +259,7 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 									} //end relation unique check function
 								); //end relation unique check
 							} //end else (good symptom)
-						}); //end get symp by id
+						}); //end get symptom by id
 					},
 					//runs after the for each is done
 					function (err) {
@@ -294,14 +284,14 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 /**
  FUNCTION: get illnesses linked to symptom
  PURPOSE: to get a list of illnesses that are linked to a symptom determined by the id that is provided.
- PARAMS: id: unique identifyer of the symptom that the illnesses are linked to.
+ PARAMS: id: unique identifier of the symptom that the illnesses are linked to.
  callback
  */
 Relations.getIllnessesLinkedToSymptom = function (id, majorCallback) {
 	var symptomFromId;
 	//array of illness ids related to the symptom
-	var illnessIds = [];
-	//array to illnesses that are found using thier id
+	// var illnessIds = [];
+	//array to illnesses that are found using their id
 	var illnesses = [];
 
 
@@ -312,7 +302,7 @@ Relations.getIllnessesLinkedToSymptom = function (id, majorCallback) {
 		[
 			function (callback) {
 				Symptom.getById(id, function (err, symptom) {
-					console.log("get by id calback with symptom: ", symptom);
+					console.log("get by id callback with symptom: ", symptom);
 					if (err) {
 						console.log(err);
 						callback(err, null);
@@ -323,7 +313,6 @@ Relations.getIllnessesLinkedToSymptom = function (id, majorCallback) {
 						} else {
 							console.log("No such symptom with id: ", id);
 							callback("No such symptom with id: " + id);
-							return;
 						}
 					}
 				});
@@ -334,7 +323,6 @@ Relations.getIllnessesLinkedToSymptom = function (id, majorCallback) {
 			function (callback) {
 				if (!symptomFromId) {
 					callback();
-					return;
 				} else {
 
 					var queryString = "SELECT DISTINCT `illness`.* FROM `illness`, `illness_symptoms` " +
@@ -343,14 +331,14 @@ Relations.getIllnessesLinkedToSymptom = function (id, majorCallback) {
 
 
 					//query the database for the illnesses that are related to the symptom id
-					var query = db.getConnection().query(queryString, [id], function (err, rows) {
+					db.getConnection().query(queryString, [id], function (err, rows) {
 						//if there is an error
 						if (err) {
 							callback(err);
 						} else {
 							//loop over all of the rows
 							for (var i = 0; i < rows.length; i++) {
-								//add to the illnessid array every illness id that applies
+								//add to the illness id array every illness id that applies
 								illnesses[i] = new Illness(rows[i]);
 							}
 							//end routine nicely
@@ -386,7 +374,7 @@ Relations.linkIllnessesToSymptom = function (symptomId, illnessIds, majorCallbac
 	var duplicateEntries = [];
 
 	if (illnessIds.length < 1) {
-		err = "No illnesses to relate to symptom with id: " + symptomId;
+		var err = "No illnesses to relate to symptom with id: " + symptomId;
 		majorCallback(err);
 		return;
 	}
@@ -457,7 +445,7 @@ Relations.linkIllnessesToSymptom = function (symptomId, illnessIds, majorCallbac
 										var queryString = "INSERT INTO `illness_symptoms` (`illness_id`, `symptom_id`) VALUES(?,?);";
 										var values = [illnessId, symptomId];
 										//query the database
-										var query = db.getConnection().query(queryString, values, function (err, result) {
+										var query = db.getConnection().query(queryString, values, function (err) {
 											if (err) {
 												console.log("error in relating query");
 												console.log(err);
@@ -527,7 +515,6 @@ Relations.getSymptomsLinkedToCategory = function (id, majorCallback) {
 							callback();
 						} else {
 							callback("No such category with id: " + id);
-							return;
 						}
 					}
 				});
@@ -535,27 +522,26 @@ Relations.getSymptomsLinkedToCategory = function (id, majorCallback) {
 			function (callback) { //get all of the illnesses
 				if (!categoryFromId) {
 					callback();
-					return;
-				}
+				} else {
 
-				//get all of the illnesses in that category
+					//get all of the illnesses in that category
 
-				Relations.getIllnessesInCategory(id, function (err, illnesses) {
-					if (err || !illnesses) {
-						console.log(err);
-						callback(err || "no illnesses in this category");
-					} else {
-						for (var i = 0; i < illnesses.length; i++) {
-							illnessesIdsInCategory[i] = illnesses[i].getData().id;
+					Relations.getIllnessesInCategory(id, function (err, illnesses) {
+						if (err || !illnesses) {
+							console.log(err);
+							callback(err || "no illnesses in this category");
+						} else {
+							for (var i = 0; i < illnesses.length; i++) {
+								illnessesIdsInCategory[i] = illnesses[i].getData().id;
+							}
+							callback();
 						}
-						callback();
-					}
-				});
+					});
+				}
 			},
 			function (callback) { //get all of the unique symptoms
 				if (!illnessesIdsInCategory || illnessesIdsInCategory.length < 1) {
 					callback();
-					return;
 				} else {
 
 					var insert = "`illness_symptoms`.`illness_id` = ?";
@@ -570,7 +556,7 @@ Relations.getSymptomsLinkedToCategory = function (id, majorCallback) {
 						"WHERE `illness_symptoms`.`symptom_id` = `symptom`.`id` " +
 						"AND " + inserts;
 
-					var query = db.getConnection().query(queryString, illnessesIdsInCategory, function (err, rows) {
+					db.getConnection().query(queryString, illnessesIdsInCategory, function (err, rows) {
 						if (err) {
 							console.log(err);
 							callback(err);
@@ -611,7 +597,7 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 		[
 			function (callback) {
 				Symptom.getById(id, function (err, symptom) {
-					console.log("get by id calback with symptom: ", symptom);
+					console.log("get by id callback with symptom: ", symptom);
 					if (err) {
 						console.log(err);
 						callback(err, null);
@@ -622,7 +608,6 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 						} else {
 							console.log("No such symptom with id: ", id);
 							callback("No such symptom with id: " + id);
-							return;
 						}
 					}
 				});
@@ -630,7 +615,6 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 			function (callback) { //GET LIST OF ILLNESS IDS
 				if (!symptomFromId) {
 					callback();
-					return;
 				} else {
 
 					Relations.getIllnessesLinkedToSymptom(id, function (err, illnesses) {
@@ -653,7 +637,7 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 			},
 			function (callback) { //GET DISTINCT CATEGORIES FROM ILLNESS IDS
 				if (illnessIds.length < 0) {
-					err = "No illnesses are linked to this symptom";
+					var err = "No illnesses are linked to this symptom";
 					callback(err);
 				} else {
 					var insert = "`illness`.`id` = ?";
@@ -668,7 +652,7 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 						"WHERE `category`.`id` = `illness`.`category` " +
 						"AND ( " + inserts + " )";
 
-					var query = db.getConnection().query(queryString, illnessIds,
+					db.getConnection().query(queryString, illnessIds,
 						function (err, rows) {
 							if (err) {
 								console.log(err);
@@ -693,6 +677,29 @@ Relations.getCategoriesLinkedToSymptom = function (id, majorCallback) {
 }; //END FUNCTION
 
 
+Relations.getCategoryLinkedToIllness = function (id, callback) {
+	if (id) {
+		Illness.getById(id, function (err, illness) {
+			if (err || !illness) {
+				console.log("err: ", err, "illness: ", illness);
+				callback(err || "No such illness from id: " + id, null);
+			} else {
+
+				Category.getById(illness.getData().category, function (err, category) {
+					if (err || !category) {
+						callback(err || "no such category linked to illness")
+					} else {
+						callback(null, category);
+					}
+				});
+			}
+		});
+	} else {
+		callback("bad illness id");
+	}
+};
+
+
 Relations.getIllnessesInCategory = function (id, callback) {
 	Category.getById(id, function (err, category) {
 		if (err || !category) {
@@ -700,7 +707,7 @@ Relations.getIllnessesInCategory = function (id, callback) {
 			callback(err || "No such category with id: " + id);
 		} else {
 			//SELECT `illness`.* FROM `category`, `illness` WHERE `category`.`id` = 1 AND `illness`.`category` = 1
-			var query = db.getConnection().query("SELECT `illness`.* FROM `category`, `illness` WHERE `category`.`id` = ? AND `illness`.`category` = ?", [id, id],
+			db.getConnection().query("SELECT `illness`.* FROM `category`, `illness` WHERE `category`.`id` = ? AND `illness`.`category` = ?", [id, id],
 				function (err, rows) {
 					if (err) {
 						console.log(err);
