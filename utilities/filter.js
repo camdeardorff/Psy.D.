@@ -9,7 +9,8 @@ var db = require('../database/databaseInterface'),
 /**
  * @constructor Filter
  */
-function Filter() {}
+function Filter() {
+}
 
 
 /**
@@ -32,7 +33,11 @@ Filter.categoriesAndIllnessesWith = function (symptoms, callback) {
 			Relations.getCategoriesLinkedToSymptom(symptomID, function (err, categories) {
 				if (!err) {
 					//add the new categories to the list
-					foundCategories = foundCategories.concat(categories);
+					for (var i = 0; i < categories.length; i++) {
+						foundCategories.push({
+							category: categories[i].getData()
+						});
+					}
 				}
 				callback(err);
 			})
@@ -43,7 +48,11 @@ Filter.categoriesAndIllnessesWith = function (symptoms, callback) {
 			Relations.getIllnessesLinkedToSymptom(symptomID, function (err, illnesses) {
 				if (!err) {
 					//add the new illnesses to the list
-					foundIllnesses = foundIllnesses.concat(illnesses);
+					for (var i = 0; i < illnesses.length; i++) {
+						foundIllnesses.push({
+							illness: illnesses[i].getData()
+						});
+					}
 				}
 				callback(err);
 			});
@@ -64,7 +73,6 @@ Filter.categoriesAndIllnessesWith = function (symptoms, callback) {
 };
 
 
-
 /**
  * @function FILTER illnessesAndSymptoms with (params)
  * @description filters out illnesses and symptoms based on a list of categories and return the lists of matching illnesses
@@ -83,7 +91,11 @@ Filter.illnessesAndSymptomsWith = function (categories, callback) {
 			Relations.getIllnessesInCategory(categoryID, function (err, illnesses) {
 				if (!err) {
 					//add new illnesses to list of illnesses
-					foundIllnesses = foundIllnesses.concat(illnesses);
+					for (var i = 0; i < illnesses.length; i++) {
+						foundIllnesses.push({
+							illness: illnesses[i].getData()
+						});
+					}
 				}
 				callback(err);
 			});
@@ -94,7 +106,11 @@ Filter.illnessesAndSymptomsWith = function (categories, callback) {
 			Relations.getSymptomsLinkedToCategory(categoryID, function (err, symptoms) {
 				if (!err) {
 					// add new symptoms to list of symmptoms
-					foundSymptoms = foundSymptoms.concat(symptoms);
+					for (var i = 0; i < symptoms.length; i++) {
+						foundSymptoms.push({
+							symptom: symptoms[i].getData()
+						});
+					}
 				}
 				callback(err);
 			});
@@ -117,7 +133,6 @@ Filter.illnessesAndSymptomsWith = function (categories, callback) {
 };
 
 
-
 /**
  * @function FILTER categoriesAndSymptoms with (params)
  * @description filters out categories and symptoms based on a list of illness and return the lists of matching categories
@@ -125,7 +140,7 @@ Filter.illnessesAndSymptomsWith = function (categories, callback) {
  * @param illnesses list of illnesses to filter by
  * @param callback (err, categories, symptoms)
  */
-Filter.categoriesAndSymptomsWith  = function (illnesses, callback) {
+Filter.categoriesAndSymptomsWith = function (illnesses, callback) {
 
 	var foundCategories = [];
 	var foundSymptoms = [];
@@ -137,7 +152,9 @@ Filter.categoriesAndSymptomsWith  = function (illnesses, callback) {
 			Relations.getCategoryLinkedToIllness(illnessID, function (err, category) {
 				if (!err) {
 					//push this category onto the found categories
-					foundCategories.push(category);
+						foundCategories.push({
+							category: category.getData()
+						});
 				}
 				callback(err);
 			});
@@ -148,7 +165,11 @@ Filter.categoriesAndSymptomsWith  = function (illnesses, callback) {
 			Relations.getSymptomsLinkedToIllness(illnessID, function (err, symptoms) {
 				if (!err) {
 					// add symptoms to the list of found symptoms
-					foundSymptoms = foundSymptoms.concat(symptoms);
+					for (var i = 0; i < symptoms.length; i++) {
+						foundSymptoms.push({
+							symptom: symptoms[i].getData()
+						});
+					}
 				}
 				callback(err);
 			});
@@ -220,7 +241,6 @@ Filter.categoriesWith = function (illnesses, symptoms, callback) {
 };
 
 
-
 /**
  * @function FILTER illnesses with (params)
  * @description filters illnesses based on a list of categories and symptoms
@@ -265,7 +285,6 @@ Filter.illnessesWith = function (categories, symptoms, callback) {
 	});
 	console.log(query.sql);
 };
-
 
 
 /**
@@ -315,6 +334,77 @@ Filter.symptomsWith = function (categories, illnesses, callback) {
 };
 
 
+/**
+ * @function FILTER without condition
+ * @description gets every category, illness, and symptom and sends it back. Without a condition everything matches.
+ * @param callback
+ */
+Filter.withoutCondition = function (callback) {
+	var error = null;
+
+	var allCategories = [];
+	var allIllnesses = [];
+	var allSymptoms = [];
+
+	//get all of the categories in the database
+	var getCategories = function (callback) {
+		Category.getAll(function (err, categories) {
+			if (!err) {
+				var formattedCategories = [];
+				for (var i = 0; i < categories.length; i++) {
+					formattedCategories.push({category: categories[i].getData()});
+				}
+				allCategories = formattedCategories;
+			} else {
+				error = err;
+			}
+			callback();
+		});
+	};
+
+	//gets all of the illnesses in the database
+	var getIllnesses = function (callback) {
+		Illness.getAll(function (err, illnesses) {
+			//check for and handle errors
+			if (!err) {
+				var formattedIllnesses = [];
+				//loop over each illnesses and prepare it for response
+				for (var i = 0; i < illnesses.length; i++) {
+					formattedIllnesses.push({illness: illnesses[i].getData()});
+				}
+				allIllnesses = formattedIllnesses;
+			} else {
+				error = err;
+			}
+			callback();
+		});
+	};
+
+	//gets all of the symptoms in the database
+	var getSymptoms = function (callback) {
+		Symptom.getAll(function (err, symptoms) {
+			//check for and handle errors
+			if (!err) {
+				//there is no error, send back the data
+				var formattedSymptoms = [];
+				for (var i = 0; i < symptoms.length; i++) {
+					formattedSymptoms[i] = {symptom: symptoms[i].getData()}
+				}
+
+				allSymptoms = formattedSymptoms
+			} else {
+				error = err;
+			}
+			callback();
+		});
+	};
+
+	//run all processes in parallel and send back what we find
+	async.parallel([getCategories, getIllnesses, getSymptoms], function () {
+		callback(error, allCategories, allIllnesses, allSymptoms);
+	});
+};
+
 
 /**
  * @function get Compound Query String
@@ -323,9 +413,9 @@ Filter.symptomsWith = function (categories, illnesses, callback) {
  * @param count number of columns
  * @returns {string}
  */
-function getCompoundQueryString (column, count) {
+function getCompoundQueryString(column, count) {
 	var queryString = "";
-	for (var i=0; i<count; i++) {
+	for (var i = 0; i < count; i++) {
 		if (i == 0) {
 			queryString = column + " = ? ";
 		} else {
@@ -336,22 +426,23 @@ function getCompoundQueryString (column, count) {
 }
 
 
-
 /**
  * @function unique
  * @description extension of array. Returns an array of only the unique elements in that array. No repeats.
  * @returns {Array}
  */
-Array.prototype.unique = function(){
+Array.prototype.unique = function () {
 	'use strict';
 	var im = {}, uniq = [];
-	for (var i=0;i<this.length;i++){
+	for (var i = 0; i < this.length; i++) {
 		var type = (this[i]).constructor.name,
 		//          ^note: for IE use this[i].constructor!
 			val = type + (!/num|str|regex|bool/i.test(type)
 					? JSON.stringify(this[i])
 					: this[i]);
-		if (!(val in im)){uniq.push(this[i]);}
+		if (!(val in im)) {
+			uniq.push(this[i]);
+		}
 		im[val] = 1;
 	}
 	return uniq;
