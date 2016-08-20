@@ -19,7 +19,7 @@ var _ = require("lodash");
 function Symptom(data) {
 	//set the data to the sanitized version of the data
 	this.data = this.sanitize(data);
-};
+}
 
 //get the data (accessor function)
 Symptom.prototype.getData = function () {
@@ -31,29 +31,34 @@ Symptom.prototype.sanitize = function (data) {
 	//either use the data or an empty obj (no null)
 	data = data || {};
 	//use the symptom schema
-	schema = schemas.symptom;
+	var schema = schemas.symptom;
 	return _.pick(_.defaults(data, schema), _.keys(schema));
 };
 
 /*
 	FUNCTION: save
 	PURPOSE: create a new entry in the database for a symptom with the data already included in this object
-	PARAMS: callback: signals the caller to handle the reprocussions but most importantly returns values.
+	PARAMS: callback: signals the caller to handle the repercussions but most importantly returns values.
 */
 Symptom.prototype.save = function (callback) {
 	//make a reference to this symptom for future use
-	symp = this;
+	var holdSymptom = this;
 	//create two arrays. one for columns of the symptom table. one for it's values
-	var cols = [];
-	var vals = [];
+	var columns = [];
+	var values = [];
 	//loop over all of the data in this obj
-	for (var col in this.data) {
+	for (var column in this.data) {
 		//push into their respective arrays
-		cols.push(col);
-		vals.push(this.data[col])
+		if (this.data.hasOwnProperty(column)) {
+			columns.push(column);
+			values.push(this.data[column])
+		}
 	}
-	//insert into the databse  INSERT INTO `symptom` (`id`, `name`) VALUES (NULL, 'something for this test');
-	var query = db.getConnection().query("INSERT INTO `symptom` (??) VALUES (?);", [cols, vals],
+
+	//TODO: check whether the symptom is already in here. NO DUPLICATES
+
+	//insert into the database  INSERT INTO `symptom` (`id`, `name`) VALUES (NULL, 'something for this test');
+	var query = db.getConnection().query("INSERT INTO `symptom` (??) VALUES (?);", [columns, values],
 		function (err, result) {
 			//check for an error
 			console.log("symptom save query callback");
@@ -64,7 +69,7 @@ Symptom.prototype.save = function (callback) {
 				callback(err);
 			} else {
 				//set the id of this obj to the auto increment value of this entry
-				symp.data.id = result.insertId;
+				holdSymptom.data.id = result.insertId;
 				callback(null);
 			}
 		});
@@ -86,16 +91,15 @@ Symptom.prototype.update = function (callback) {
 			var values = [];
 			var inserts = "";
 			var insert = "?? = ?";
-			for (var val in symptomData) {
-				console.log("loopty loop");
-				console.log(symptomData[val]);
-				values.push(val);
-				values.push(symptomData[val]);
-				inserts += insert + ",";
+			for (var value in symptomData) {
+				if (symptomData.hasOwnProperty(value)){
+					values.push(value);
+					values.push(symptomData[value]);
+					inserts += insert + ",";
+				}
 			}
 			values.push(symptomData.id);
 			inserts = inserts.slice(0,-1);
-
 
 
 			var query = "UPDATE `symptom` SET " + inserts + " WHERE `symptom`.`id` =  ?;";
@@ -122,7 +126,7 @@ Symptom.prototype.delete = function (callback) {
 			callback(err || "No such Symptom with id: " + symptomData.id);
 		} else {
 			//the symptom exists. lets delete it
-			var query = "DELETE FROM `symptom` WHERE `symptom`.`id` = ?"
+			var query = "DELETE FROM `symptom` WHERE `symptom`.`id` = ?";
 			var q = db.getConnection().query(query, symptomData.id, function (err, result) {
 				if (err) {
 					console.log(err);
@@ -150,7 +154,7 @@ Symptom.prototype.delete = function (callback) {
 	PARAMS: callback: signals the caller to handle the reprocussions but most importantly returns values.
 */
 Symptom.getAll = function (callback) {
-	//query the databse for the symptoms
+	//query the database for the symptoms
 	db.getConnection().query("SELECT * FROM `symptom`", function (err, rows) {
 		//check for an error
 		if (err) {
@@ -168,7 +172,7 @@ Symptom.getAll = function (callback) {
 			callback(null, symptoms);
 		}
 	});
-}
+};
 
 
 /*
@@ -179,9 +183,9 @@ Symptom.getAll = function (callback) {
 */
 Symptom.getById = function (id, callback) {
 	//query the database for all of the symptoms that match the id
-	var query = db.getConnection().query("SELECT * FROM `symptom` " +
+	db.getConnection().query("SELECT * FROM `symptom` " +
 		"WHERE `id` = ?", id,
-		function (err, rows, fields) {
+		function (err, rows) {
 			//check for an error
 			if (err) {
 				//log it out
@@ -191,7 +195,7 @@ Symptom.getById = function (id, callback) {
 				//no error but there may not have been a matching symptom
 				if (rows.length > 0) {
 					//there was a symptom that matched the id. make it into a symptom and send it back
-					symptom = new Symptom(rows[0]);
+					var symptom = new Symptom(rows[0]);
 					callback(null, symptom);
 				} else {
 					//there was no matching symptom
@@ -199,6 +203,6 @@ Symptom.getById = function (id, callback) {
 				}
 			}
 		});
-}
+};
 
 module.exports = Symptom;

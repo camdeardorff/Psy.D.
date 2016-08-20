@@ -1,6 +1,6 @@
 {
   "name": "Psy.D.",
-  "version": "0.0.1-beta",
+  "version": "0.0.2-beta",
   "description": "A database application using node js and mysql to serve information on mental illness and their symptoms.",
   "main": "app.js",
   "scripts": {
