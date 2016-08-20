@@ -13,7 +13,8 @@
 //import necessary modules
 var express = require('express'),
 	router = express.Router(),
-	Relations = require('../models/relations');
+	Relations = require('../utilities/relations'),
+	async = require('async');
 
 
 ///////////////////////////////////////////////////////////////////
@@ -29,7 +30,7 @@ var express = require('express'),
 router.get('/allSymptomsFromIllness/:id', function (req, res) {
 	var message = {};
 	//get request data
-	data = req.params;
+	var data = req.params;
 	//check if id is included. if not kill it
 	if (!data.id) {
 		message.error = "Missing Illness id";
@@ -78,7 +79,6 @@ router.post('/createIllnessSymptomRelations', function (req, res) {
 		message.success = false;
 		message.error = "Bad or missing parameters";
 		res.json(message);
-		return;
 	} else {
 		//put the data into vars. mostly for the array split
 		var illnessId = data.illnessId;
@@ -106,22 +106,19 @@ router.post('/createIllnessSymptomRelations', function (req, res) {
 });
 
 
-
-
-
 ///////////////////////////////////////////////////////////////////
 /*                   Symptom 1-many Illness						 */
 ///////////////////////////////////////////////////////////////////
 
 /**
  ROUTE: GET @ ---/allIllnessesFromSymptom/:id
- PURPOSE: to retreive and return a list of ever symptom that is linked to an illness identified by id.
- REQUEST VALUES: id: identier of the illness to grab related symptoms
+ PURPOSE: to retrieve and return a list of ever symptom that is linked to an illness identified by id.
+ REQUEST VALUES: id: identifier of the illness to grab related symptoms
  */
 router.get('/allIllnessesFromSymptom/:id', function (req, res) {
 	var message = {};
 	//get the request data
-	data = req.params;
+	var data = req.params;
 
 	//check if id was included. if not kill it
 	if (!data.id) {
@@ -164,19 +161,17 @@ router.get('/allIllnessesFromSymptom/:id', function (req, res) {
 router.post('/createSymptomIllnessRelations', function (req, res) {
 	var message = {};
 	//get the request data
-	data = req.body;
+	var data = req.body;
 	//if there is no id in the request data then return a fail
 	if (!data.symptomId || !data.illnessIds) {
 		message.success = false;
 		message.error = "Bad or missing parameters";
 		res.json(message);
-		return;
 	} else {
 
-		console.log(data.illnessIds);
-		//put the data into vars. mostly for the array split
+		//put the data into vars.
 		var symptomId = data.symptomId;
-		var illnessIds = data.illnessIds; //.split(',');
+		var illnessIds = data.illnessIds;
 
 		//link the symptom to the illnesses
 		Relations.linkIllnessesToSymptom(symptomId, illnessIds,
@@ -211,7 +206,6 @@ router.delete('/illness/:illnessId/symptom/:symptomId', function (req, res) {
 		message.success = false;
 		message.error = "Bad or missing parameters";
 		res.json(message);
-		return;
 	} else {
 		console.log("\nGood values.. try to delete now");
 
@@ -223,7 +217,6 @@ router.delete('/illness/:illnessId/symptom/:symptomId', function (req, res) {
 				message.error = err;
 				message.success = false;
 			} else {
-				console.log()
 				message.success = true;
 			}
 			res.json(message);
@@ -233,17 +226,9 @@ router.delete('/illness/:illnessId/symptom/:symptomId', function (req, res) {
 });
 
 
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////
 /*                   Symptom 1-many Categories					 */
 ///////////////////////////////////////////////////////////////////
-
-
 
 
 /**
@@ -254,7 +239,7 @@ router.delete('/illness/:illnessId/symptom/:symptomId', function (req, res) {
 router.get('/allCategoriesFromSymptom/:id', function (req, res) {
 	var message = {};
 	//get the request data
-	data = req.params;
+	var data = req.params;
 
 	//check if id was included. if not kill it
 	if (!data.id) {
@@ -286,18 +271,6 @@ router.get('/allCategoriesFromSymptom/:id', function (req, res) {
 			});
 	}
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //export all of the routes that have been defined

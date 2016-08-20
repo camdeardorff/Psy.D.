@@ -13,11 +13,8 @@
 //import the needed libraries and such
 var express = require('express'),
 	router = express.Router(),
-	auth = require('../middlewares/authenticator'),
 	Symptom = require('../models/symptom'),
 	Schemas = require('../schemas');
-
-
 
 
 
@@ -27,27 +24,24 @@ var express = require('express'),
  PURPOSE: to retrieve all of the symptoms currently listed in the database
  */
 router.get('/', function (req, res) {
-	//use symptom's static functino for getting symptoms from db
+	var message = {};
+	//use symptom's static function for getting symptoms from db
 	Symptom.getAll(function (err, symptoms) {
 		//check for and handle errors
 		if (err) {
-			//send back a failure notice
-			res.json({
-				success: false
-			});
+			message.success = false;
+			message.error = err;
 		} else {
-			console.log(symptoms);
 			//there is no error, send back the data
 			var formattedSymptoms = [];
 			for (var i=0; i<symptoms.length; i++) {
 				formattedSymptoms[i] = {symptom: symptoms[i].getData()}
 			}
 
-			res.json({
-				success: true,
-				symptoms: formattedSymptoms
-			});
+			message.success = true;
+			message.symptoms = formattedSymptoms;
 		}
+		res.json(message);
 	});
 });
 
@@ -112,9 +106,8 @@ router.post('/', function (req, res) {
 	console.log(req);
 	//get the data
 	var message = {};
-	data = req.body.symptom;
-	console.log("data: ", data);
-	dataInfo = Schemas.validateDataWithSchema(data, Schemas.symptom)
+	var data = req.body.symptom;
+	var dataInfo = Schemas.validateDataWithSchema(data, Schemas.symptom);
 	//if the data does not have a parameter for the name return a fail
 	if (!dataInfo.valid) {
 		message.error = "Bad request data. Missing parameters.";
@@ -147,8 +140,8 @@ router.post('/', function (req, res) {
 
 router.put('/', function (req, res) {
 	var message = {};
-	data = req.body.symptom;
-	dataInfo = Schemas.validateDataWithSchema(data, Schemas.symptom);
+	var data = req.body.symptom;
+	var dataInfo = Schemas.validateDataWithSchema(data, Schemas.symptom);
 
 	if (!dataInfo.valid) {
 		message.error = "Bad request data. Missing parameters.";
@@ -161,6 +154,7 @@ router.put('/', function (req, res) {
 			console.log("update symptom callback");
 			if (err) {
 				message.success = false;
+				message.error = err;
 			} else {
 				message.success = true;
 			}

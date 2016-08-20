@@ -13,10 +13,7 @@
 //import the necessary dependancies
 var express = require('express'),
 	router = express.Router(),
-	async = require('async'),
-	auth = require('../middlewares/authenticator'),
 	Illness = require('../models/illness'),
-	Relations = require('../models/relations'),
 	Schemas = require('../schemas');
 
 
@@ -26,56 +23,24 @@ var express = require('express'),
  */
 router.get('/', function (req, res) {
 	console.log("GOT REQUEST!");
-	//use illness static functino for getting illnesses from db
+	var message = {};
+	//use illness static function for getting illnesses from db
 	Illness.getAll(function (err, illnesses) {
 		//check for and handle errors
 		if (err) {
-			//send back a failure notice
-			res.json({
-				success: false
-			});
+			message.success = false;
+			message.error = err;
 		} else {
-
 			var formattedIllnesses = [];
+			//loop over each illnesses and prepare it for response
+			for (var i = 0; i < illnesses.length; i++) {
+				formattedIllnesses.push({illness: illnesses[i].getData()});
+			}
 
-
-			async.forEachLimit(illnesses, 5, function (illness, callback) {
-				console.log(illness);
-
-				Relations.getSymptomsLinkedToIllness(illness.getData().id, function (err, symptoms) {
-					if (err) {
-						console.log(err);
-						callback(err);
-					} else {
-
-						var symptomIds = [];
-						for (var i = 0; i < symptoms.length; i++) {
-							symptomIds.push(symptoms[i].getData().id);
-						}
-
-						illness.data.symptoms = symptomIds;
-
-						formattedIllnesses.push({illness: illness.getData()});
-
-						callback();
-					}
-				});
-
-
-			}, function (err) {
-				if (err) {
-					res.json({
-						success: false,
-						error: err
-					});
-				} else {
-					res.json({
-						success: true,
-						illnesses: formattedIllnesses
-					});
-				}
-			});
+			message.success = true;
+			message.illnesses = formattedIllnesses;
 		}
+		res.json(message);
 	});
 });
 
@@ -86,54 +51,31 @@ router.get('/', function (req, res) {
  NOTE: notice how the data of the request comes through the params obj from the req
  */
 router.get('/:id', function (req, res) {
+	var message = {};
 	//get the data that the user has sent
-	data = req.params;
+	var data = req.params;
 	//check that we have what we need
 	if (!data.id) {
-		res.json({
-			success: false
-		});
-		return;
+		message.error = "Bad request data. Missing parameters.";
+		message.missingProperty = 'id';
+		message.success = false;
+		res.json(message);
 	} else {
 
-		//use illness static functino for getting illnesses from db
+		//use illness static function for getting illnesses from db
 		Illness.getById(data.id, function (err, illness) {
 			//check for and handle errors
-			if (err) {
+			if (err || !illness) {
 				//send back a failure notice
-				res.json({
-					success: false
-				});
+				message.success = false;
+				message.error = err || "No illnesses with an id: " + data.id;
 			} else {
-				//no errors but the illness could be null
-				if (illness) {
-					//true illness. send it back
-
-					Relations.getSymptomsLinkedToIllness(illness.getData().id, function (err, symptoms) {
-
-						var symptomIds = [];
-						for (var i = 0; i < symptoms.length; i++) {
-							symptomIds.push(symptoms[i].getData().id);
-						}
-
-						illness.data.symptoms = symptomIds;
-
-						res.json({
-							success: true,
-							illness: illness.getData()
-						});
-
-					});
-
-
-				} else {
-					//there was no db error but there was no such illness
-					res.json({
-						success: false,
-						error: "No illnesses with an id: " + data.id
-					});
-				}
+				//prepare a successful response message
+				message.success = true;
+				message.illness = illness.getData();
 			}
+			//send message
+			res.json(message);
 		});
 	}
 });
@@ -145,9 +87,9 @@ router.get('/:id', function (req, res) {
  */
 router.post("/", function (req, res) {
 	var message = {};
-	data = req.body.illness;
+	var data = req.body.illness;
 
-	dataInfo = Schemas.validateDataWithSchema(data, Schemas.illness)
+	var dataInfo = Schemas.validateDataWithSchema(data, Schemas.illness);
 	//if the data does not have a parameter for the name return a fail
 	if (!dataInfo.valid) {
 		message.error = "Bad request data. Missing parameters.";

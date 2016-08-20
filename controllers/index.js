@@ -12,6 +12,7 @@ router.use('/illness', require('./illness'));
 router.use('/symptom', require('./symptom'));
 router.use('/relations', require('./relations'));
 router.use('/category', require('./category'));
+router.use('/filter', require('./filter'));
 
 
 router.get('/', function (req, res) {

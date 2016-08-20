@@ -18,7 +18,6 @@
 //import the necessary dependancies
 var express = require('express'),
 	router = express.Router(),
-	auth = require('../middlewares/authenticator'),
 	Category = require('../models/category'),
 	Schema = require('../schemas');
 
@@ -26,20 +25,20 @@ var express = require('express'),
 
 
 router.get('/', function (req, res) {
+	var message = {};
 
 	Category.getAll(function (err, categories) {
-		var message = {};
 		if (err) {
 			message.success = false;
 			message.error = err;
 		} else {
-			message.success = true;
-			message.categories = [];
+			var formattedCategories = [];
 			for (var i = 0; i < categories.length; i++) {
-				message.categories[i] = {
-					category: categories[i].getData()
-				}
+				formattedCategories.push({category: categories[i].getData()});
 			}
+
+			message.success = true;
+			message.categories = formattedCategories;
 		}
 		res.json(message);
 	});
@@ -52,7 +51,7 @@ router.get('/:id', function (req, res) {
 
 	if (!id) {
 		message.success = false;
-		message.error = "bad id passed"
+		message.error = "bad id passed";
 		res.json(message);
 
 	} else {
