@@ -77,8 +77,10 @@ router.post('/', function (req, res) {
 				callback("There are no results because at least one of every kind has been selected to filter by.");
 			}
 		} else {
-			// nothing was selected
-			callback("There are no results because there aren't any selected lists to filter by.");
+			// nothing was selected, so send back everything we have
+			filter.withoutCondition(function (err, categories, illnesses, symptoms) {
+				callback(err, categories, illnesses, symptoms);
+			});
 		}
 	};
 
