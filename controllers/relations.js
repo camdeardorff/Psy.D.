@@ -24,8 +24,8 @@ var express = require('express'),
 
 /**
  ROUTE: GET @ ---/allSymptomsFromIllness/:id
- PURPOSE: to retreive and return a list of ever symptom that is linked to an illness identified by id.
- REQUEST VALUES: id: identier of the illness to grab related symptoms
+ PURPOSE: to retrieve and return a list of ever symptom that is linked to an illness identified by id.
+ REQUEST VALUES: id: identifier of the illness to grab related symptoms
  */
 router.get('/allSymptomsFromIllness/:id', function (req, res) {
 	var message = {};
@@ -73,7 +73,7 @@ router.get('/allSymptomsFromIllness/:id', function (req, res) {
 router.post('/createIllnessSymptomRelations', function (req, res) {
 	var message = {};
 	//get the request data
-	data = req.body;
+	var data = req.body;
 	//if there is no id in the request data then return a fail
 	if (!data.illnessId || !data.symptomIds) {
 		message.success = false;
@@ -207,7 +207,6 @@ router.delete('/illness/:illnessId/symptom/:symptomId', function (req, res) {
 		message.error = "Bad or missing parameters";
 		res.json(message);
 	} else {
-		console.log("\nGood values.. try to delete now");
 
 		Relations.deleteIllnessSymptomRelation(illnessId, symptomId, function (err, result) {
 			console.log("delete relation callback");
