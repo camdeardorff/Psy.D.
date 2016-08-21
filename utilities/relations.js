@@ -36,7 +36,7 @@ Relations.isUniqueIllnessSymptomRelation = function (illnessId, symptomId, callb
 					console.log(err);
 					callback(err);
 				} else {
-					callback(null, rows.length > 0);
+					callback(null, rows.length < 1);
 				}
 			});
 	}
@@ -161,123 +161,124 @@ Relations.linkSymptomsToIllness = function (illnessId, symptomIds, majorCallback
 	if (symptomIds.length < 1) {
 		var err = "No symptoms to relate to illness with id: " + illnessId;
 		majorCallback(err);
-		return;
-	}
+	} else {
 
-	//run sync
-	//get the illness obj from its id
-	//loop over every symptom id
-	//get the sympt obj from its id
-	//link both the illness and symptom
+		//run sync
+		//get the illness obj from its id
+		//loop over every symptom id
+		//get the sympt obj from its id
+		//link both the illness and symptom
 
-	async.series([
-			//get illness obj from id
-			function (callback) {
-				//use illness static function for getting illnesses from db
-				Illness.getById(illnessId, function (err, illness) {
-					//check for and handle errors
-					console.log("get id completed with err: " + err);
-					if (err) {
+		async.series([
+				//get illness obj from id
+				function (callback) {
+					//use illness static function for getting illnesses from db
+					console.log("trying to get illness with id: ", illnessId);
+					Illness.getById(illnessId, function (err, illness) {
+						//check for and handle errors
+						console.log("get id completed with err: " + err);
+						if (err || !illness) {
+							callback(err || "could not find illness with id: " + illnessId);
+						} else {
+							//there is no error, send back the data
+							console.log("illness found: " + illness);
+							illnessFromId = illness;
+							callback();
+						}
+					});
+
+				},
+				//do work with the illness obj and the symptom ids provided
+				function (callback) {
+					console.log("next series item, getting symptoms and adding them");
+					//loop over all symptom ids
+					//a max of 5 at a time
+
+					//check if the illness was found. if not then return
+					if (!illnessFromId) {
+						var err = "could not find illness with id: " + illnessId;
 						callback(err);
-					} else {
-						//there is no error, send back the data
-						console.log("illness found: " + illness);
-						illnessFromId = illness;
-						callback();
+						return;
 					}
-				});
-
-			},
-			//do work with the illness obj and the symptom ids provided
-			function (callback) {
-				console.log("next series item, getting symptoms and adding them");
-				//loop over all symptom ids
-				//a max of 5 at a time
-
-				//check if the illness was found. if not then return
-				if (!illnessFromId) {
-					var err = "could not find illness with id: " + illnessId;
-					callback(err);
-					return;
-				}
 
 
-				async.forEachLimit(symptomIds, 5, function (symptomId, callback) {
-						//find symptom using its id.
-						//relate
+					async.forEachLimit(symptomIds, 5, function (symptomId, callback) {
+							//find symptom using its id.
+							//relate
 
-						//use symptom static function for getting symptoms from db
-						Symptom.getById(symptomId, function (err, symptom) {
-							console.log("got symptom from id");
-							//check for and handle errors
-							if (err) {
-								//there was a mysql query error. log it and be done
-								console.log(err);
-								callback(err);
-							} else if (!symptom) {
-								//there was no such symptom but no err
-								console.log("no such symptom");
-								err = "no such symptom with id: " + symptomId;
-								unsuccessfulEntries.push({
-									illnessWithId: illnessId,
-									symptomWithId: symptomId
-								});
-								callback(err, symptomId);
-							} else {
-								Relations.isUniqueIllnessSymptomRelation(illnessId, symptomId,
-									function (err, isUnique) {
-										if (err) {
-											console.log("error in is unique relation callback");
-											console.log("error: ", err);
-											callback(err);
-										} else if (!isUnique) {
-
-											duplicateEntries.push({
-												illnessWithId: illnessId,
-												symptomWithId: symptomId
-											});
-											callback();
-										} else {
-											//no error and a valid symptom
-											//relate the illness and symptom
-											var queryString = "INSERT INTO `illness_symptoms` (`illness_id`, `symptom_id`) VALUES(?,?);";
-											var values = [illnessId, symptomId];
-											//query the database
-											var query = db.getConnection().query(queryString, values, function (err) {
-												if (err) {
-													console.log("error in relating query");
-													console.log(err);
-												} else {
-													successfulEntries.push({
-														illnessWithId: illnessId,
-														symptomWithId: symptomId
-													});
-												}
+							//use symptom static function for getting symptoms from db
+							Symptom.getById(symptomId, function (err, symptom) {
+								console.log("got symptom from id");
+								//check for and handle errors
+								if (err) {
+									//there was a mysql query error. log it and be done
+									console.log(err);
+									callback(err);
+								} else if (!symptom) {
+									//there was no such symptom but no err
+									console.log("no such symptom");
+									err = "no such symptom with id: " + symptomId;
+									unsuccessfulEntries.push({
+										illnessWithId: illnessId,
+										symptomWithId: symptomId
+									});
+									callback(err, symptomId);
+								} else {
+									Relations.isUniqueIllnessSymptomRelation(illnessId, symptomId,
+										function (err, isUnique) {
+											if (err) {
+												console.log("error in is unique relation callback");
+												console.log("error: ", err);
 												callback(err);
-											}); //end relation query
-										} //end else case (normal case)
-									} //end relation unique check function
-								); //end relation unique check
-							} //end else (good symptom)
-						}); //end get symptom by id
-					},
-					//runs after the for each is done
-					function (err) {
-						//end this series
-						console.log("finished for each");
-						console.log("err: " + err);
-						callback(err);
-					}
-				);
+											} else if (!isUnique) {
+
+												duplicateEntries.push({
+													illnessWithId: illnessId,
+													symptomWithId: symptomId
+												});
+												callback();
+											} else {
+												//no error and a valid symptom
+												//relate the illness and symptom
+												var queryString = "INSERT INTO `illness_symptoms` (`illness_id`, `symptom_id`) VALUES(?,?);";
+												var values = [illnessId, symptomId];
+												//query the database
+												var query = db.getConnection().query(queryString, values, function (err) {
+													if (err) {
+														console.log("error in relating query");
+														console.log(err);
+													} else {
+														successfulEntries.push({
+															illnessWithId: illnessId,
+															symptomWithId: symptomId
+														});
+													}
+													callback(err);
+												}); //end relation query
+											} //end else case (normal case)
+										} //end relation unique check function
+									); //end relation unique check
+								} //end else (good symptom)
+							}); //end get symptom by id
+						},
+						//runs after the for each is done
+						function (err) {
+							//end this series
+							console.log("finished for each");
+							console.log("err: " + err);
+							callback(err);
+						}
+					);
+				}
+				//this runs after both the illness grab and the sympt grab + link have used their callbacks
+			],
+			function (err) {
+				//end this entire function with 'majorCallback'
+				console.log("finished series with err: " + err);
+				majorCallback(err, successfulEntries, unsuccessfulEntries, duplicateEntries);
 			}
-			//this runs after both the illness grab and the sympt grab + link have used their callbacks
-		],
-		function (err) {
-			//end this entire function with 'majorCallback'
-			console.log("finished series with err: " + err);
-			majorCallback(err, successfulEntries, unsuccessfulEntries, duplicateEntries);
-		}
-	);
+		);
+	}
 };
 
 
