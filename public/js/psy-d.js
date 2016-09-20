@@ -138,13 +138,20 @@ function reloadHandlers() {
 
 			filter(categoryIds, illnessIds, symptomIds);
 
-		} else if (filterOn) {
-			loadCategories();
-			loadSymptoms();
 		}
 	});
 }
 
+$('#filter-btn').click(function () {
+	if (filterOn) {
+		$('div.check-div').hide();
+		filterOn = false;
+	} else {
+		$('div.check-div').show();
+		filterOn = true;
+	}
+	resetCheckboxes()
+});
 
 $('div.container-title-options span.glyphicon-search').click(function () {
 	var searchBar = $(this).parent().siblings('form.search-bar');
@@ -322,7 +329,8 @@ function makeRequest(method, url, data, callback) {
 //new symptom plus
 $('#symptom-list div span.glyphicon-plus').click(function () {
 	if (symptomList.find('li.new').length < 1) {
-
+		filterOn = false;
+		resetCheckboxes();
 		symptomList.find('ul').prepend("" +
 			"<li class='symptom-data well new'>" +
 			"<div>" +
@@ -341,7 +349,8 @@ $('#symptom-list div span.glyphicon-plus').click(function () {
 //new category plus
 $('#category-list div span.glyphicon-plus').click(function () {
 	if (categoryList.find('li.new').length < 1) {
-
+		filterOn = false;
+		resetCheckboxes();
 		categoryList.find('ul').prepend("" +
 			"<li class='category-data well new'>" +
 			"<div>" +
@@ -360,7 +369,8 @@ $('#category-list div span.glyphicon-plus').click(function () {
 //new category plus
 $('#illness-list div span.glyphicon-plus').click(function () {
 	if (illnessList.find('li.new').length < 1) {
-
+		filterOn = false;
+		resetCheckboxes()
 		$('#category-list').find('div.check-div').show();
 		$('#symptom-list').find('div.check-div').show();
 		illnessList.find('ul').prepend("" +
@@ -439,7 +449,7 @@ function search(type, comparisonType, collection, comparator) {
 
 function createCategoryBlock(category) {
 	var hidden = "";
-	if (!categoryList.find('span.glyphicon-filter').hasClass("state-ON")) {
+	if (!filterOn) {
 		hidden = "style='display: none;'";
 	}
 
@@ -457,7 +467,7 @@ function createCategoryBlock(category) {
 
 function createIllnessBlock(illness) {
 	var hidden = "";
-	if (!illnessList.find('span.glyphicon-filter').hasClass("state-ON")) {
+	if (!filterOn) {
 		hidden = "style='display: none;'";
 	}
 
@@ -477,7 +487,7 @@ function createIllnessBlock(illness) {
 
 function createSymptomBlock(symptom) {
 	var hidden = "";
-	if (!symptomList.find('span.glyphicon-filter').hasClass("state-ON")) {
+	if (!filterOn) {
 		hidden = "style='display: none;'";
 	}
 
@@ -514,6 +524,11 @@ function removeSymptom(id) {
 	});
 }
 
+function resetCheckboxes() {
+	$('input[type="checkbox"]:checked').each(function () {
+		$(this).prop('checked', false);
+	});
+}
 
 function filter(categoryIds, illnessIds, symptomIds) {
 	var request = {

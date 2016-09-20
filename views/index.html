@@ -32,6 +32,9 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="#">Psy.D.</a>
         </div>
+        <div class="navbar-right">
+            <a id="filter-btn" class="btn btn-default">Filter</a>
+        </div>
         <!--/.nav-collapse -->
     </div>
 </nav>
@@ -42,10 +45,9 @@
     <div class="row">
         <div id="category-list" class="col-sm-4 psy-list">
             <div class="container-title-options">
-                <h2>Categories</h2>
+                <h2 data-toggle="collapse" data-target="#cat-ul" aria-expanded="true">Categories</h2>
                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
             </div>
             <form class="form-inline search-bar">
                 <div class="form-group">
@@ -53,14 +55,13 @@
                     <input type="text" class="form-control" id="category-list-search" placeholder="Search Here">
                 </div>
             </form>
-            <ul></ul>
+            <ul id="cat-ul" class="collapse in"></ul>
         </div>
         <div id="illness-list" class="col-sm-4 psy-list">
             <div class="container-title-options">
-                <h2>Illnesses</h2>
+                <h2 data-toggle="collapse" data-target="#ill-ul" aria-expanded="true">Illnesses</h2>
                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
             </div>
             <form class="form-inline search-bar">
                 <div class="form-group">
@@ -68,14 +69,13 @@
                     <input type="text" class="form-control" id="illness-list-search" placeholder="Search Here">
                 </div>
             </form>
-            <ul></ul>
+            <ul id="ill-ul" class="collapse in"></ul>
         </div>
         <div id="symptom-list" class="col-sm-4 psy-list">
             <div class="container-title-options">
-                <h2>Symptoms</h2>
+                <h2 data-toggle="collapse" data-target="#symp-ul" aria-expanded="true">Symptoms</h2>
                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
             </div>
             <form class="form-inline search-bar">
                 <div class="form-group">
@@ -83,7 +83,7 @@
                     <input type="text" class="form-control" id="symptom-list-search" placeholder="Search Here">
                 </div>
             </form>
-            <ul></ul>
+            <ul id="symp-ul" class="collapse in"></ul>
         </div>
     </div>
 

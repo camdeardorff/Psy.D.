@@ -98,3 +98,6 @@ a.remove-btn {
     color: #dd7700;
     float: right;
 }
+a#filter-btn {
+    margin-top: 8px;
+}
