@@ -342,6 +342,7 @@ $('#symptom-list div span.glyphicon-plus').click(function () {
 			"<input type='text' class='form-control' id='new-symptom-name' placeholder='Name'>" +
 			"</div>" +
 			"</li>");
+		symptomList.find('.new').first().find('input').first().focus();
 	} else {
 		symptomList.find('li.new').remove();
 	}
@@ -362,6 +363,7 @@ $('#category-list div span.glyphicon-plus').click(function () {
 			"<input type='text' class='form-control' id='new-category-name' placeholder='Name'>" +
 			"</div>" +
 			"</li>");
+		categoryList.find('.new').first().find('input').first().focus();
 	} else {
 		categoryList.find('li.new').remove();
 	}
@@ -388,6 +390,7 @@ $('#illness-list div span.glyphicon-plus').click(function () {
 			"<p>Please select some Symptom(s) for this illness.</p>" +
 			"</div>" +
 			"</li>");
+		illnessList.find('.new').first().find('input').first().focus();
 	} else {
 		illnessList.find('li.new').remove();
 		$('#category-list').find('div.check-div').hide();
