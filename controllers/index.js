@@ -13,6 +13,8 @@ router.use('/symptom', require('./symptom'));
 router.use('/relations', require('./relations'));
 router.use('/category', require('./category'));
 router.use('/filter', require('./filter'));
+router.use('/admin', require('./admin'));
+router.use('/diagnose', require('./diagnose'));
 
 
 router.get('/', function (req, res) {
