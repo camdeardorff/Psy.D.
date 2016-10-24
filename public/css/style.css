@@ -7,6 +7,9 @@ html, body {
 div.container {
     /*height: 100%;*/
 }
+.navbar-header {
+    width: 100%;
+}
 
 @media (min-width: 768px) {
     html, body {
@@ -39,7 +42,7 @@ div.container {
 
 div.psy-list ul {
     list-style: none;
-    padding: 0px;
+    padding: 0;
 }
 
 .psy-list ul li div.check-div {
@@ -100,4 +103,9 @@ a.remove-btn {
 }
 a#filter-btn {
     margin-top: 8px;
+    float: right;
+}
+
+.admin-only {
+    display: none;
 }
