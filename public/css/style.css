@@ -4,9 +4,72 @@ html, body {
     padding: 0;
 }
 
-div.container {
-    /*height: 100%;*/
+
+/*
+    Index styles
+*/
+
+#canvas-image {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url("/public/img/stock-photo-45173400.jpg");
+    background-position-x: 50%;
+    z-index: -1;
 }
+
+#intro-div {
+    padding-top: 15%;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+#intro-div #title h1 {
+    display: inline-block;
+    color: #cccccc;
+    text-shadow: 2px 2px black;
+
+}
+
+#intro-div #title a {
+    background: none;
+    border: #cccccc 1px solid;
+    border-radius: 7px;
+    height: 35px;
+    font-size: 17px;
+    vertical-align: super;
+    float: right;
+    margin-top: 27px;
+    margin-right: 27px;
+    background-color: rgba(0,0,0,0);
+    text-decoration: none;
+    color: #cccccc;
+    padding: 5px;
+    text-shadow: 1px 1px black;
+
+}
+
+#intro-div .content-body {
+    margin-top: 30px;
+    font-size: 20px;
+    color: #cccccc;
+    text-shadow: 1px 1px black;
+}
+
+
+
+
+
+/*
+    Diagnose and Admin styles
+*/
+
+
 .navbar-header {
     width: 100%;
 }
