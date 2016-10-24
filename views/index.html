@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Psy.D.</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../public/css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <link href="../public/css/style.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <style>
+
+    </style>
+
+
+</head>
+
+<body>
+
+
+<!-- Create a <canvas> element -->
+<canvas id="canvas-image"></canvas>
+
+
+<div id="intro-div" class="container">
+    <div id="title">
+        <h1>Psy.D </h1>
+        <a href="/diagnose">Continue</a>
+    </div>
+    <div class="content">
+        <div class="content-body">
+            Psy.D. is an interactive tool for learning about Clinical Psychological Diagnoses.
+            Whether you are in the field of Clinical Psychology or you just have profound
+            interest in Psychological Disorders, this is a perfect way to help you further explore the field.  
+        </div>
+
+        <div class="content-body">
+            Although Psy.D. is a great tool of exploring the field of clinical psychology,
+            just because you use it does not make you a practicing psychologist.
+            Please use this interactive tool as a way to learn about the many mental disorders,
+            not to use an exact diagnosis tool (unless otherwise licensed to do so).  
+        </div>
+    </div>
+
+</div>
+
+
+<script src="../public/js/jquery.js"></script>
+<script src="../public/js/bootstrap.min.js"></script>
+<script src="../public/js/granim.min.js"></script>
+
+<!-- Create a Granim instance -->
+<script>
+    var granimInstance = new Granim({
+        element: '#canvas-image',
+        direction: 'top-bottom',
+        opacity: [0.7, 0.5, 0.3],
+        isPausedWhenNotInView: true,
+        states : {
+            "default-state": {
+                gradients: [
+                    ['#485563', '#2180ed', '#29323c'],
+                    ['#00c6ff', '#29323c', '#0072ff']
+                ],
+                transitionSpeed: 10000
+            }
+        }
+    });
+</script>
+
+</body>
+
+</html>
