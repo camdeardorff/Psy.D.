@@ -5,8 +5,8 @@
  */
 
 
-var express = require('express'),
-	router = express.Router();
+var express = require('express');
+var router = express.Router();
 
 router.use('/illness', require('./illness'));
 router.use('/symptom', require('./symptom'));
@@ -16,9 +16,8 @@ router.use('/filter', require('./filter'));
 router.use('/admin', require('./admin'));
 router.use('/diagnose', require('./diagnose'));
 
-
+// accept GET request and respond with the index page
 router.get('/', function (req, res) {
-	console.log("Got at /");
 	res.render("index");
 });
 
