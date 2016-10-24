@@ -1,76 +1,63 @@
-categoryUrls = {
-	newCategory: "/category/",
-	allCategory: "/category/",
-	deleteCategory: "/category/"
-};
-illnessUrls = {
-	newIllness: "/illness/",
-	allIllness: "/illness/",
-	deleteIllness: "/illness/"
-};
-symptomUrls = {
-	newSymptom: "/symptom/",
-	allSymptoms: "/symptom/",
-	deleteSymptom: "/symptom/"
-};
-relationUrls = {
-	newIllnessSymptoms: "/relations/createIllnessSymptomRelations"
-};
-filterUrls = {
+// urls to make requests to
+urls = {
+	category: "/category/",
+	illness: "/illness/",
+	symptom: "/symptom/",
+	relation: "/relations/createIllnessSymptomRelations",
 	filter: "/filter"
+
 };
 
-
+// lists of each model
 var categories = [];
 var illnesses = [];
 var symptoms = [];
 
+// boolean to indicate whether filtering is on or off
 var filterOn = false;
 
-//get all categories
+//get all categories in the dom list
 var categoryList = $("#category-list");
-//get all illnesses
+//get all illnesses in the dom list
 var illnessList = $("#illness-list");
-//get all symptoms
+//get all symptoms in the dom list
 var symptomList = $("#symptom-list");
 
-
+// once the page has loaded.. get everything from the database
 $(document).ready(function () {
-
 	getAll();
-
 });
 
-//supply a type, if non supplied then all are loaded
+// supply a type, if non supplied then all are loaded
 function getAll(type) {
 	type = type || "";
 	if (type === "CATEGORIES" || type === "") {
-		makeRequest("GET", categoryUrls.allCategory, null, function (data) {
+		makeRequest("GET", urls.category, null, function (data) {
 			if (data.success) {
 				categoryList.find('ul').empty();
 				categories = data.categories;
-				loadCategories(data.categories);
+				insertCategories(data.categories);
 			}
 			// reloadHandlers();
 
 		});
 	}
 	if (type === "ILLNESSES" || type === "") {
-		makeRequest("GET", illnessUrls.allIllness, null, function (data) {
+		makeRequest("GET", urls.illness, null, function (data) {
 			if (data.success) {
 				illnessList.find('ul').empty();
 				illnesses = data.illnesses;
-				loadIllnesses(data.illnesses);
+				insertIllnesses(data.illnesses);
 			}
 			// reloadHandlers();
 		});
 	}
 	if (type === "SYMPTOMS" || type === "") {
-		makeRequest("GET", symptomUrls.allSymptoms, null, function (data) {
+		makeRequest("GET", urls.symptom, null, function (data) {
 			if (data.success) {
 				symptomList.find('ul').empty();
 				symptoms = data.symptoms;
-				loadSymptoms(data.symptoms);
+				insertSymptoms(data.symptoms);
 			}
 			// reloadHandlers();
 		});
@@ -78,70 +65,78 @@ function getAll(type) {
 
 }
 
-function loadCategories(cat) {
+// inserts an array of categories into the dom
+function insertCategories(cats) {
 	categoryList.find('ul').empty();
-	cat = cat || categories;
-	for (var i = 0; i < cat.length; i++) {
-		createCategoryBlock(cat[i].category);
+	cats = cats || categories;
+	for (var i = 0; i < cats.length; i++) {
+		createCategoryBlock(cats[i].category);
 	}
 	reloadHandlers();
 }
-function loadIllnesses(ill) {
+// inserts an array of illnesses into the dom
+function insertIllnesses(ills) {
 	illnessList.find('ul').empty();
 
-	ill = ill || illnesses;
-	for (var i = 0; i < ill.length; i++) {
-		createIllnessBlock(ill[i].illness);
+	ills = ills || illnesses;
+	for (var i = 0; i < ills.length; i++) {
+		createIllnessBlock(ills[i].illness);
 	}
 	reloadHandlers();
 }
-function loadSymptoms(symp) {
+// inserts an array of symptoms into the dom
+function insertSymptoms(symps) {
 	symptomList.find('ul').empty();
 
-	symp = symp || symptoms;
-	for (var i = 0; i < symp.length; i++) {
-		createSymptomBlock(symp[i].symptom);
+	symps = symps || symptoms;
+	for (var i = 0; i < symps.length; i++) {
+		createSymptomBlock(symps[i].symptom);
 	}
 	reloadHandlers();
 }
 
-
+// reloads jquery listeners that should be updated when new things are added
 function reloadHandlers() {
+	// if the filter is not on then hide the checkboxes
 	if (!filterOn) {
 		$('div.check-div').hide();
 	}
 
+	// listener for any checkboxes
 	$('div.check-div input[type="checkbox"]').off().click(function () {
-		console.log("CLICK");
+
+		// if the filter is on then get each all of the selected models and send those arrays to the filter
 		if (filterOn) {
 			var id = $(this).attr('id');
 
+			// get selected categories
 			var categoryIds = [];
-
 			var selectedCategoryButtons = $('#category-list').find('input[type="checkbox"]:checked');
 			$.each(selectedCategoryButtons, function () {
 				categoryIds.push($(this).attr("data-cat-id"));
 			});
 
+			// get selected illnesses
 			var illnessIds = [];
 			var selectedIllnessButtons = $('#illness-list').find('input[type="checkbox"]:checked');
 			$.each(selectedIllnessButtons, function () {
 				illnessIds.push($(this).attr("data-ill-id"));
 			});
 
+			// get selected symptoms
 			var symptomIds = [];
 			var selectedSymptomIds = $('#symptom-list').find('input[type="checkbox"]:checked');
-
 			$.each(selectedSymptomIds, function () {
 				symptomIds.push($(this).attr("data-symp-id"));
 			});
 
+			// filter with the the selected arrays
 			filter(categoryIds, illnessIds, symptomIds);
-
 		}
 	});
 }
 
+// listener for the filter button. There is only one so no need for reloading
 $('#filter-btn').click(function () {
 	if (filterOn) {
 		$('div.check-div').hide();
@@ -153,6 +148,7 @@ $('#filter-btn').click(function () {
 	resetCheckboxes()
 });
 
+// listener for the search glyphicons. There are a set number so no need for reloading
 $('div.container-title-options span.glyphicon-search').click(function () {
 	var searchBar = $(this).parent().siblings('form.search-bar');
 
@@ -160,146 +156,7 @@ $('div.container-title-options span.glyphicon-search').click(function () {
 	searchBar.find('input').focus();
 });
 
-$('div.container-title-options span.glyphicon-filter').click(function () {
-	//to turn off
-	if ($(this).hasClass("state-ON")) {
-		console.log("TURN OFF FILTER");
-		$(this).removeClass("state-ON");
-		$(this).addClass("state-OFF");
-		$(this).parent().parent().find('div.check-div').hide();
-		filterOn = false;
-		getAll();
-	} else {//to turn on
-		console.log("TURN ON FILTER");
-		//$('div.container-title-options span.glyphicon-filter').addClass("state-OFF").removeClass("state-ON");
-		$(this).removeClass("state-OFF");
-		$(this).addClass("state-ON");
-		// $('div.check-div').hide();
-		$(this).parent().siblings('ul').find('div.check-div').show();
-		filterOn = true;
-	}
-});
-
-
-function newSymptom(newSympElem) {
-	console.log($(newSympElem));
-	var name = $(newSympElem).parent().siblings('input').val();
-	if (name) {
-		console.log("CREATE NEW SYMPTOM");
-		var symptom = {
-			symptom: {
-				id: null,
-				name: name
-			}
-		};
-		console.log(symptom);
-		makeRequest('POST', symptomUrls.newSymptom, symptom, function (data) {
-			if (data.success) {
-				cancelNew(newSympElem);
-				getAll("SYMPTOMS");
-			} else {
-				alert("Server Problem! Contact Cameron");
-			}
-
-		});
-	}
-}
-
-function newCategory(newCatElem) {
-	console.log($(newCatElem));
-	var name = $(newCatElem).parent().siblings('input').val();
-	if (name) {
-		console.log("CREATE NEW SYMPTOM");
-		var category = {
-			category: {
-				id: null,
-				name: name
-			}
-		};
-		console.log(category);
-		makeRequest('POST', categoryUrls.newCategory, category, function (data) {
-			if (data.success) {
-				cancelNew(newCatElem);
-				getAll("CATEGORIES");
-			} else {
-				alert("Server Problem! Contact Cameron");
-			}
-
-		});
-	}
-}
-
-function newIllness(newIllElem) {
-	console.log($(newIllElem));
-	var name = $(newIllElem).parent().siblings('input#new-illness-name').val();
-	var code = $(newIllElem).parent().siblings('input#new-illness-code').val();
-
-	var checkedCategory = $('#category-list').find('div.check-div').children('input[type="checkbox"]:checked').first();
-	var categoryId = checkedCategory.parent().parent().data('category-id');
-	console.log(categoryId);
-
-	var symptoms = $('#symptom-list').find('div.check-div').children('input[type="checkbox"]:checked');
-	console.log(symptoms);
-	var symptomIds = [];
-	symptoms.each(function (index, val) {
-		symptomIds.push($(val).parent().parent().data('symptom-id'));
-	});
-	// console.log(symptomIds)
-
-
-	if (name && code) {
-		if (!symptomIds || symptomIds.length < 1) {
-			alert("No symptoms selected");
-		} else if (!categoryId) {
-			alert("No category selected");
-		} else {
-			console.log("CREATE NEW ILLNESS");
-			var illness = {
-				illness: {
-					id: null,
-					name: name,
-					code: code,
-					category: categoryId
-				}
-			};
-			console.log(illness);
-			makeRequest('POST', illnessUrls.newIllness, illness, function (data) {
-				if (data.success) {
-					cancelNew(newIllElem);
-					console.log("RELATE NOW");
-
-					var relations = {
-						illnessId: data.newId,
-						symptomIds: symptomIds
-					};
-
-					console.log(relations);
-
-					makeRequest('POST', relationUrls.newIllnessSymptoms, relations, function (data) {
-						if (data.success) {
-							console.log("ITS GOOD");
-							getAll("ILLNESSES");
-
-						} else {
-							console.log("Bad relation");
-						}
-					});
-
-				} else {
-					alert("Server Problem! Contact Cameron");
-				}
-
-			});
-		}
-	}
-}
-
-function cancelNew(cancelElem) {
-	$('div.check-div').hide();
-	console.log($(cancelElem));
-	$(cancelElem).parent().parent().parent().remove();
-}
-
+// generalized ajax request for making requests to the server
 function makeRequest(method, url, data, callback) {
 	//get all of the illnesses
 	if (!data) {
@@ -326,119 +183,52 @@ function makeRequest(method, url, data, callback) {
 }
 
 
-//new symptom plus
-$('#symptom-list div span.glyphicon-plus').click(function () {
-	if (symptomList.find('li.new').length < 1) {
-		filterOn = false;
-		resetCheckboxes();
-		symptomList.find('ul').prepend("" +
-			"<li class='symptom-data well new'>" +
-			"<div>" +
-			"<div class='create-new-ico'>" +
-			"<span class='glyphicon glyphicon-ok' aria-hidden='true' onclick='newSymptom(this)'></span>" +
-			"<span class='glyphicon glyphicon-remove' aria-hidden='true' onclick='cancelNew(this)'></span>" +
-			"</div>" +
-			"<label for='new-symptom-name'>Symptom Name:</label>" +
-			"<input type='text' class='form-control' id='new-symptom-name' placeholder='Name'>" +
-			"</div>" +
-			"</li>");
-		symptomList.find('.new').first().find('input').first().focus();
-	} else {
-		symptomList.find('li.new').remove();
-	}
-});
-//new category plus
-$('#category-list div span.glyphicon-plus').click(function () {
-	if (categoryList.find('li.new').length < 1) {
-		filterOn = false;
-		resetCheckboxes();
-		categoryList.find('ul').prepend("" +
-			"<li class='category-data well new'>" +
-			"<div>" +
-			"<div class='create-new-ico'>" +
-			"<span class='glyphicon glyphicon-ok' aria-hidden='true' onclick='newCategory(this)'></span>" +
-			"<span class='glyphicon glyphicon-remove' aria-hidden='true' onclick='cancelNew(this)'></span>" +
-			"</div>" +
-			"<label for='new-category-name'>Category Name:</label>" +
-			"<input type='text' class='form-control' id='new-category-name' placeholder='Name'>" +
-			"</div>" +
-			"</li>");
-		categoryList.find('.new').first().find('input').first().focus();
-	} else {
-		categoryList.find('li.new').remove();
-	}
-});
-//new category plus
-$('#illness-list div span.glyphicon-plus').click(function () {
-	if (illnessList.find('li.new').length < 1) {
-		filterOn = false;
-		resetCheckboxes()
-		$('#category-list').find('div.check-div').show();
-		$('#symptom-list').find('div.check-div').show();
-		illnessList.find('ul').prepend("" +
-			"<li class='illness-data well new'>" +
-			"<div>" +
-			"<div class='create-new-ico'>" +
-			"<span class='glyphicon glyphicon-ok' aria-hidden='true' onclick='newIllness(this)'></span>" +
-			"<span class='glyphicon glyphicon-remove' aria-hidden='true' onclick='cancelNew(this)'></span>" +
-			"</div>" +
-			"<label for='new-illness-name'>Illness Name:</label>" +
-			"<input type='text' class='form-control' id='new-illness-name' placeholder='Name'>" +
-			"<label for='new-illness-code'>Illness Code:</label>" +
-			"<input type='text' class='form-control' id='new-illness-code' placeholder='Code'>" +
-			"<p>Please select a Category for this illness.</p>" +
-			"<p>Please select some Symptom(s) for this illness.</p>" +
-			"</div>" +
-			"</li>");
-		illnessList.find('.new').first().find('input').first().focus();
-	} else {
-		illnessList.find('li.new').remove();
-		$('#category-list').find('div.check-div').hide();
-		$('#symptom-list').find('div.check-div').hide();
-	}
-});
+/* LIST SEARCHING FUNCTIONS */
 
-//search category
+//search category list
 $('#category-list-search').keyup(function () {
 	var text = $(this).val();
 	var reducedCategories = search("category", "name", categories, text);
 
 	categoryList.find('ul').empty();
 	for (var i = 0; i < reducedCategories.length; i++) {
-		var id = reducedCategories[i].category.id;
-		var name = reducedCategories[i].category.name;
+		// var id = reducedCategories[i].category.id;
+		// var name = reducedCategories[i].category.name;
 		createCategoryBlock(reducedCategories[i].category);
 	}
 
 });
-//search illness
+
+//search illness list
 $('#illness-list-search').keyup(function () {
 	var text = $(this).val();
 	var reducedIllnesses = search("illness", "name", illnesses, text);
 
 	illnessList.find('ul').empty();
 	for (var i = 0; i < reducedIllnesses.length; i++) {
-		var id = reducedIllnesses[i].illness.id;
-		var name = reducedIllnesses[i].illness.name;
-		var code = reducedIllnesses[i].illness.code;
+		// var id = reducedIllnesses[i].illness.id;
+		// var name = reducedIllnesses[i].illness.name;
+		// var code = reducedIllnesses[i].illness.code;
 		createIllnessBlock(reducedIllnesses[i].illness);
 	}
 
 });
-//search symptom
+
+//search symptomlist
 $('#symptom-list-search').keyup(function () {
 	var text = $(this).val();
 	var reducedSymptoms = search("symptom", "name", symptoms, text);
 
 	symptomList.find('ul').empty();
 	for (var i = 0; i < reducedSymptoms.length; i++) {
-		var id = reducedSymptoms[i].symptom.id;
-		var name = reducedSymptoms[i].symptom.name;
+		// var id = reducedSymptoms[i].symptom.id;
+		// var name = reducedSymptoms[i].symptom.name;
 		createSymptomBlock(reducedSymptoms[i].symptom);
 	}
 
 });
-//search
+
+// generalized for searching any list for any type and then putting it back into the list
 function search(type, comparisonType, collection, comparator) {
 	var matching = [];
 	for (var i = 0; i < collection.length; i++) {
@@ -449,7 +239,8 @@ function search(type, comparisonType, collection, comparator) {
 	return matching;
 }
 
-
+// creates a block for an already defined category
+// this is used to display a category from the database
 function createCategoryBlock(category) {
 	var hidden = "";
 	if (!filterOn) {
@@ -463,11 +254,12 @@ function createCategoryBlock(category) {
 		"<div class='info-div'>" +
 		"<h4>" + category.name + "</h4>" +
 		"<span><b></b></span>&nbsp;" +
-		"<span><a class='remove-btn' onclick='removeCategory(" + category.id + ")'>Remove</a></span>" +
 		"</div>" +
 		"</li>");
 }
 
+// creates a block for an already defined illness
+// this is used to display a illness from the database
 function createIllnessBlock(illness) {
 	var hidden = "";
 	if (!filterOn) {
@@ -479,7 +271,7 @@ function createIllnessBlock(illness) {
 		"<div class='info-div'><h4>" + illness.name + "</h4>" +
 		"<span><b>ID: </b>" + illness.id + ", </span>&nbsp;" +
 		"<span><b>Code: </b>" + illness.code + "</span>&nbsp;" +
-		"<span><a class='remove-btn' onclick='removeIllness(" + illness.id + ")'>Remove</a></span>" +
+		"<span><a class='remove-btn admin-only' onclick='removeIllness(" + illness.id + ")'>Remove</a></span>" +
 		"</div>" +
 		"</li>";
 
@@ -488,6 +280,8 @@ function createIllnessBlock(illness) {
 	illnessList.find('ul').prepend(illnessLI);
 }
 
+// creates a block for an already defined symptom
+// this is used to display a symptom from the database
 function createSymptomBlock(symptom) {
 	var hidden = "";
 	if (!filterOn) {
@@ -499,40 +293,20 @@ function createSymptomBlock(symptom) {
 		"<div class='check-div'" + hidden + "><input type='checkbox' id='symp-" + symptom.id + "' data-symp-id='" + symptom.id + "'/> <label for='symp-" + symptom.id + "'><span></span></label></div>" +
 		"<div class='info-div'><h4>" + symptom.name + "</h4>" +
 		"<span><b>ID: </b>" + symptom.id + "</span>&nbsp;" +
-		"<span><a class='remove-btn' onclick='removeSymptom(" + symptom.id + ")'>Remove</a></span>" +
+		"<span><a class='remove-btn admin-only' onclick='removeSymptom(" + symptom.id + ")'>Remove</a></span>" +
 		"</div>" +
 		"</li>");
 }
 
-function removeCategory(id) {
-	console.log("remove Category with id: ", id);
-	makeRequest("DELETE", categoryUrls.deleteCategory + id, null, function (data) {
-		console.log("successful delete");
-		getAll("CATEGORIES");
-	});
-}
-
-function removeIllness(id) {
-	makeRequest("DELETE", illnessUrls.deleteIllness + id, null, function (data) {
-		console.log("successful delete");
-		getAll("ILLNESSES");
-	});
-}
-
-function removeSymptom(id) {
-	console.log("remove symptom with id: ", id);
-	makeRequest("DELETE", symptomUrls.deleteSymptom + id, null, function (data) {
-		console.log("successful delete");
-		getAll("SYMPTOMS");
-	});
-}
-
+// reset's all checkboxes on category, symptom, and illness blocks
 function resetCheckboxes() {
 	$('input[type="checkbox"]:checked').each(function () {
 		$(this).prop('checked', false);
 	});
 }
 
+// filters out categories, illnesses, and symptoms based on a list
+// of each. Finds the intersection of the provided lists related.
 function filter(categoryIds, illnessIds, symptomIds) {
 	var request = {
 		categories: categoryIds,
@@ -540,17 +314,17 @@ function filter(categoryIds, illnessIds, symptomIds) {
 		symptoms: symptomIds
 	};
 	console.log(request);
-	makeRequest("POST", filterUrls.filter, request, function (data) {
+	makeRequest("POST", urls.filter, request, function (data) {
 		console.log(data);
 		if (data.success) {
 			if (data.categories) {
-				loadCategories(data.categories);
+				insertCategories(data.categories);
 			}
 			if (data.illnesses) {
-				loadIllnesses(data.illnesses);
+				insertIllnesses(data.illnesses);
 			}
 			if (data.symptoms) {
-				loadSymptoms(data.symptoms);
+				insertSymptoms(data.symptoms);
 			}
 		}
 	});
