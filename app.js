@@ -14,7 +14,6 @@ var logger = require('morgan');
 
 //app.use(require('./middlewares'));
 app.use(logger('combined'));
-app.use(require('./controllers'));
 app.use("/public", express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -23,6 +22,8 @@ app.use(bodyParser.urlencoded({
 
 app.set('views', './views');
 app.set('view engine', 'pug');
+
+app.use(require('./controllers'));
 
 
 // start the server
